@@ -1,17 +1,17 @@
-,Period,Product,Sub-Product,Measure,Net balance at 1 January,Changes in the statement of profit and loss and OCI,Contracts under the modified retrospective transition approach,Contracts under the fair value transition approach,Other contracts,Expected incurred claims and other insurance services expenses,Amortisation of insurance acquisition cash flows,Losses and reversals of losses on onerous contracts,Adjustments to liabilities for incurred claims,Insurance service result,Net finance expenses from insurance contracts,Effect of movement in exchange rates,Investment components and premium refunds,Total changes in the statement of profit and loss and OCI,Premiums received,"Claims and other insurance services expenses paid, including investment components",Insurance acquisition cash flows,Total cash flows,Transfer to other items in the statement of financial position,Net balance at 31 December
-0,2019,Liabilities for remaining coverage - Excluding loss component,0,0,0.0,0,0,0,0.0,0.0,0,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0
-0,2019,NPA,ABC,Liabilities for remaining coverage - Only Loss Component,0.0,0,0,0,0.0,0.0,0,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0
-0,2019,NPA,ABC,Liabilities for incurred claims,0.0,0,0,0,10179075.0,26333305.0,0,0.0,0.0,36512380.0,-27140919.0,0,-27140919.0,9371461.0,0.0,0.0,0.0,0.0,0,9371461.0
-0,2019,NPA,ABC,Total,0.0,0,0,0,,,0,,,,,0,,,,,,,0,
-0,2020,NPA,ABC,Liabilities for remaining coverage - Excluding loss component,,0,0,0,25881617.0,14993891.0,0,0.0,0.0,40875508.0,-53730830.0,0,-53730830.0,-12855322.0,283121927.0,-103841751.0,-2727342.0,176552834.0,0,
-0,2020,NPA,ABC,Liabilities for remaining coverage - Only Loss Component,0.0,0,0,0,0.0,0.0,0,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0
-0,2020,NPA,ABC,Liabilities for incurred claims,9371461.0,0,0,0,20179075.0,26333305.0,0,0.0,0.0,46512380.0,-27140919.0,0,-27140919.0,19371461.0,0.0,0.0,0.0,0.0,0,28742922.0
-0,2020,NPA,ABC,Total,,0,0,0,46060692.0,,0,,,,,0,,,,,,,0,
-0,2021,NPA,ABC,Liabilities for remaining coverage - Excluding loss component,,0,0,0,2926831.0,14993891.0,0,0.0,0.0,17920722.0,-53730830.0,0,-53730830.0,-35810108.0,283121927.0,-103841751.0,-2727342.0,176552834.0,0,
-0,2021,NPA,ABC,Liabilities for remaining coverage - Only Loss Component,0.0,0,0,0,0.0,0.0,0,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0
-0,2021,NPA,ABC,Liabilities for incurred claims,28742922.0,0,0,0,10179075.0,26333305.0,0,0.0,0.0,36512380.0,-27140919.0,0,-27140919.0,9371461.0,0.0,0.0,0.0,0.0,0,38114383.0
-0,2021,NPA,ABC,Total,,0,0,0,13105906.0,,0,,,,,0,,,,,,,0,
-0,2022,NPA,ABC,Liabilities for remaining coverage - Excluding loss component,,0,0,0,2926831.0,14993891.0,0,0.0,0.0,17920722.0,-53730830.0,0,-53730830.0,-35810108.0,283121927.0,-103841751.0,-2727342.0,176552834.0,0,
-0,2022,NPA,ABC,Liabilities for remaining coverage - Only Loss Component,0.0,0,0,0,0.0,0.0,0,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0
-0,2022,NPA,ABC,Liabilities for incurred claims,38114383.0,0,0,0,20179075.0,26333305.0,0,0.0,0.0,46512380.0,-27140919.0,0,-27140919.0,19371461.0,0.0,0.0,0.0,0.0,0,57485844.0
-0,2022,NPA,ABC,Total,,0,0,0,23105906.0,,0,,,,,0,,,,,,,0,
+,Period,Measure,Product,Sub-Product,Net balance at 1 January,Changes in the statement of profit and loss and OCI,Contracts under the modified retrospective transition approach,Contracts under the fair value transition approach,Other contracts,Expected incurred claims and other insurance services expenses,Amortisation of insurance acquisition cash flows,Losses and reversals of losses on onerous contracts,Adjustments to liabilities for incurred claims,Insurance service result,Net finance expenses from insurance contracts,Effect of movement in exchange rates,Investment components and premium refunds,Total changes in the statement of profit and loss and OCI,Premiums received,"Claims and other insurance services expenses paid, including investment components",Insurance acquisition cash flows,Total cash flows,Transfer to other items in the statement of financial position,Net balance at 31 December
+0,2019,Liabilities for remaining coverage - Excluding loss component,NPA,ABC,0.0,0,0,0,2926831,14993891.0,0,0.0,0.0,17920722.0,-53730830.0,0,-53730830.0,-35810108.0,283121927.0,-103841751.0,-2727342.0,176552834.0,0,140742726.0
+0,2019,Liabilities for remaining coverage - Only Loss Component,NPA,ABC,0.0,0,0,0,0,0.0,0,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0
+0,2019,Liabilities for incurred claims,NPA,ABC,0.0,0,0,0,10179075,26333305.0,0,0.0,0.0,36512380.0,-27140919.0,0,-27140919.0,9371461.0,0.0,0.0,0.0,0.0,0,9371461.0
+0,2019,Total,NPA,ABC,0.0,0,0,0,13105906,,0,,,,,0,,,,,,,0,
+0,2020,Liabilities for remaining coverage - Excluding loss component,NPA,ABC,140742726.0,0,0,0,25881617,14993891.0,0,0.0,0.0,40875508.0,-53730830.0,0,-53730830.0,-12855322.0,283121927.0,-103841751.0,-2727342.0,176552834.0,0,304440238.0
+0,2020,Liabilities for remaining coverage - Only Loss Component,NPA,ABC,0.0,0,0,0,0,0.0,0,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0
+0,2020,Liabilities for incurred claims,NPA,ABC,9371461.0,0,0,0,20179075,26333305.0,0,0.0,0.0,46512380.0,-27140919.0,0,-27140919.0,19371461.0,0.0,0.0,0.0,0.0,0,28742922.0
+0,2020,Total,NPA,ABC,,0,0,0,46060692,,0,,,,,0,,,,,,,0,
+0,2021,Liabilities for remaining coverage - Excluding loss component,NPA,ABC,304440238.0,0,0,0,2926831,14993891.0,0,0.0,0.0,17920722.0,-53730830.0,0,-53730830.0,-35810108.0,283121927.0,-103841751.0,-2727342.0,176552834.0,0,445182964.0
+0,2021,Liabilities for remaining coverage - Only Loss Component,NPA,ABC,0.0,0,0,0,0,0.0,0,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0
+0,2021,Liabilities for incurred claims,NPA,ABC,28742922.0,0,0,0,10179075,26333305.0,0,0.0,0.0,36512380.0,-27140919.0,0,-27140919.0,9371461.0,0.0,0.0,0.0,0.0,0,38114383.0
+0,2021,Total,NPA,ABC,,0,0,0,13105906,,0,,,,,0,,,,,,,0,
+0,2022,Liabilities for remaining coverage - Excluding loss component,NPA,ABC,445182964.0,0,0,0,2926831,14993891.0,0,0.0,0.0,17920722.0,-53730830.0,0,-53730830.0,-35810108.0,283121927.0,-103841751.0,-2727342.0,176552834.0,0,585925690.0
+0,2022,Liabilities for remaining coverage - Only Loss Component,NPA,ABC,0.0,0,0,0,0,0.0,0,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0
+0,2022,Liabilities for incurred claims,NPA,ABC,38114383.0,0,0,0,20179075,26333305.0,0,0.0,0.0,46512380.0,-27140919.0,0,-27140919.0,19371461.0,0.0,0.0,0.0,0.0,0,57485844.0
+0,2022,Total,NPA,ABC,,0,0,0,23105906,,0,,,,,0,,,,,,,0,
