@@ -21,3 +21,6 @@ test:
     - cd src/
     - jupyter nbconvert --to script IFRS17SoftwareCode-GMM.ipynb
     - python IFRS17SoftwareCode-GMM.py
+    - cd ..
+    - cd IFRS17/
+    - python gmm.py
