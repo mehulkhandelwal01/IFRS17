@@ -9,7 +9,7 @@ cache:
     - venv/
 
 before_script:
-  - python --version  # For debugging
+  - python --version
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
@@ -21,14 +21,3 @@ test:
     - cd src/
     - jupyter nbconvert --to script IFRS17SoftwareCode-GMM.ipynb
     - python IFRS17SoftwareCode-GMM.py
-
-push-back-to-remote:
-  script:
-    - git config user.email "patrickmoehrke@dupro.co.uk"
-    - git config user.name "patrickmoehrke"
-    - git remote add gitlab_origin https://oauth2:$ACCESS_TOKEN@gitlab.com/patrickmoehrke/ifrs17-calculation-app.git
-    - cd src/
-    - jupyter nbconvert --to script IFRS17SoftwareCode-GMM.ipynb
-    - git add .
-    - git commit -m 'Add .py version of notebook'
-    - git push gitlab_origin HEAD:main -o ci.skip # prevent triggering pipeline again
