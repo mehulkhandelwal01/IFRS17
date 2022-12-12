@@ -2,3 +2,8 @@ venv/
 __pycache__/
 env/
 virtualenv/
+.ipynb_checkpoints/
+src/.ipynb_checkpoints/
+src/venv/
+src/virtualenv/
+src/__pycache__/
