@@ -30,5 +30,5 @@ push-back-to-remote:
     - cd src/
     - jupyter nbconvert --to script IFRS17SoftwareCode-GMM.ipynb
     - git add .
-    - git commit -m "Add: .py version of notebook"
+    - git commit -m 'Add .py version of notebook'
     - git push gitlab_origin HEAD:main -o ci.skip # prevent triggering pipeline again
