@@ -1,0 +1,5 @@
+Period,Product,Sub-Product,Opening Balance,Changes Related to Future Service: New Business,Changes Related to Future Service: Assumptions,Insurance Service Expense,Changes Related to Current Service: Experience,Changes Related to Current Service: Release,Changes Related to Past Service,Closing Balance,CLOSING
+2019,NPA,XYZ,0,0,10349790,-80871749,0,41327196,0,0,-29194763.0
+2020,NPA,XYZ,-29194763,-280394585,10349791,-80871749,0,41327196,0,0,-338784110.0
+2021,NPA,XYZ,-338784110,0,10349792,-80871749,0,41327196,0,0,-367978871.0
+2022,NPA,XYZ,-367978871,0,0,0,0,0,0,0,-367978871.0
