@@ -1,0 +1,23 @@
+image: python:latest
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+before_script:
+  - python --version  # For debugging
+  - pip install virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
+  - pip install requirements.txt
+  - pip install jupyter
+
+test:
+  script:
+    - cd src/
+    - jupyter nbconvert --to script IFRS17SoftwareCode-GMM.ipynb
+    - python IFRS17SoftwareCode-GMM.py
