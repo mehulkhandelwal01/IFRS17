@@ -7,3 +7,4 @@ src/.ipynb_checkpoints/
 src/venv/
 src/virtualenv/
 src/__pycache__/
+IFRS17/__pycache__/

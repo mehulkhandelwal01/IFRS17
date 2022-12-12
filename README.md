@@ -17,8 +17,11 @@ source venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
-4. Enter `src/` and run the notebook in Jupyter
-5. All output gets written to the `src` folder
+4. Start the `streamlit` app, located in `app.py`:
+```
+streamlit run app.py
+```
 
 ## TODO
 - [ ] Add .py version of the code to run the class as a module
+- [ ] Update Streamlit dashboard to meet requirements
