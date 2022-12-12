@@ -46,6 +46,12 @@ class GMM:
                                   '%d/%m/%Y').year
         end = datetime.strptime(self.Parameters.loc[2, "Selection"],
                                 '%d/%m/%Y').year
+        self.BEL = []
+        self.RA = []
+        self.CSM = []
+        self.TCL = []     
+        self.AMC = []
+        self.ARC = []
 
         count = 0
         for group in data_dict:
@@ -101,7 +107,7 @@ class GMM:
                     'CSM recognised in profit or loss for the services provided',
                     'Risk Adjustment recognised for the risk expired',
                     'Experience adjustments',
-                    'Changes that relate to current service',
+                   'Changes that relate to current service',
                     'Changes in estimates that adjust the CSM',
                     'Changes in estimates that result in onerous contract losses or reversal of losses',
                     'Contracts initially recognised in the period',
@@ -1677,19 +1683,24 @@ class GMM:
                            "Contractual Service Margin"),
                         "Net balance at 31 December"]
 
-                #self.Analysis_by_measurement_component.loc[(self.Analysis_by_measurement_component['Period'] == i) & (self.Analysis_by_measurement_component['Measure'] == "Total")] = self.Analysis_by_measurement_component.loc[(self.Analysis_by_measurement_component['Period'] == i) & (self.Analysis_by_measurement_component['Measure'] == "Present value of future cash flows"),['Net balance at 1 January','CSM recognised in profit or loss for the services provided','Risk Adjustment recognised for the risk expired','Experience adjustments','Changes that relate to current service','Changes in estimates that adjust the CSM','Changes in estimates that result in onerous contract losses or reversal of losses','Contracts initially recognised in the period','Changes that relate to future service','Adjustments to liabilities for incurred claims','Changes that relate to past service','Insurance service result','Finance expenses from insurance contracts issued','Effects of movements in exchange rates','Investment Component and Premium Refund','Total recognised in comprehensive income','Premiums received','Claims and other directly attributable expenses paid','Insurance acquisition cash flows','Total cash flows','Net balance at 31 December']]+self.Analysis_by_measurement_component.loc[(self.Analysis_by_measurement_component['Period'] == i) & (self.Analysis_by_measurement_component['Measure'] == "Risk Adjustment"),['Net balance at 1 January','CSM recognised in profit or loss for the services provided','Risk Adjustment recognised for the risk expired','Experience adjustments','Changes that relate to current service','Changes in estimates that adjust the CSM','Changes in estimates that result in onerous contract losses or reversal of losses','Contracts initially recognised in the period','Changes that relate to future service','Adjustments to liabilities for incurred claims','Changes that relate to past service','Insurance service result','Finance expenses from insurance contracts issued','Effects of movements in exchange rates','Investment Component and Premium Refund','Total recognised in comprehensive income','Premiums received','Claims and other directly attributable expenses paid','Insurance acquisition cash flows','Total cash flows','Net balance at 31 December']]+self.Analysis_by_measurement_component.loc[(self.Analysis_by_measurement_component['Period'] == i) & (self.Analysis_by_measurement_component['Measure'] == "Contractual Service Margin"),['Net balance at 1 January','CSM recognised in profit or loss for the services provided','Risk Adjustment recognised for the risk expired','Experience adjustments','Changes that relate to current service','Changes in estimates that adjust the CSM','Changes in estimates that result in onerous contract losses or reversal of losses','Contracts initially recognised in the period','Changes that relate to future service','Adjustments to liabilities for incurred claims','Changes that relate to past service','Insurance service result','Finance expenses from insurance contracts issued','Effects of movements in exchange rates','Investment Component and Premium Refund','Total recognised in comprehensive income','Premiums received','Claims and other directly attributable expenses paid','Insurance acquisition cash flows','Total cash flows','Net balance at 31 December']]
+            self.BEL.append(self.Reconciliation_of_Best_Estimate_Liability)
+            self.RA.append(self.Reconciliation_of_Risk_Adjustment)
+            self.CSM.append(self.Reconciliation_of_Contractual_Service_Margin)
+            self.TCL.append(self.Reconciliation_of_Total_Contract_Liability)
+            self.AMC.append(self.Analysis_by_measurement_component)
 
-            #self.Reconciliation_of_Best_Estimate_Liability = self.Reconciliation_of_Best_Estimate_Liability.to_csv(
-            #    'Reconciliation_of_Best_Estimate_Liability' + f'{group}.csv')
-            #self.Reconciliation_of_Reconciliation_of_Risk_Adjustment = self.Reconciliation_of_Risk_Adjustment.to_csv(
-            #    'Reconciliation_of_Risk_Adjustment' + f'{group}.csv')
-            #self.Reconciliation_of_Contractual_Service_Margin = self.Reconciliation_of_Contractual_Service_Margin.to_csv(
-            #    'Reconciliation_of_Contractual_Service_Margin' +
-            #    f'{group}.csv')
-            #self.Reconciliation_of_Total_Contract_Liability = self.Reconciliation_of_Total_Contract_Liability.to_csv(
-            #    'Reconciliation_of_Total_Contract_Liability' + f'{group}.csv')
-            #self.Analysis_by_measurement_component = self.Analysis_by_measurement_component.to_csv(
-            #    'Analysis_by_measurement_component' + f'{group}.csv')
+        self.BEL = pd.concat(self.BEL)
+        self.RA = pd.concat(self.RA)
+        self.CSM = pd.concat(self.CSM)
+        self.TCL = pd.concat(self.TCL)
+        self.AMC = pd.concat(self.AMC)
+        
+        #self.BEL = self.BEL.to_csv('Reconciliation_of_Best_Estimate_Liability.csv')
+        #self.RA = self.RA.to_csv('Reconciliation_of_Best_Estimate_Liability.csv')
+        #self.CSM = self.CSM.to_csv('Reconciliation_of_Contractual_Service_Margin.csv')
+        #self.TCL = self.TCL.to_csv('Reconciliation_of_Total_Contract_Liability.csv')
+        #self.AMC = self.AMC.to_csv('Analysis_by_measurement_component.csv')
+
 
         # Analysis by remaining Coverage
         data_2 = pd.pivot_table(
@@ -4925,5 +4936,7 @@ class GMM:
                          "Liabilities for incurred claims"),
                         "Net balance at 31 December"]
 
-            #self.Analysis_by_remaining_coverage = self.Analysis_by_remaining_coverage.to_csv(
-            #    'Analysis_by_remaining_coverage' + f'{group}.csv')
+                self.ARC.append(self.Analysis_by_remaining_coverage)
+
+        self.ARC = pd.concat(self.ARC)
+        #self.ARC = self.ARC.to_csv('Analysis_by_remaining_coverage.csv') 
