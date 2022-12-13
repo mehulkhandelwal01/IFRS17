@@ -78,6 +78,6 @@ with load_tab:
             
             with graph_col:
                 graph_measure = st.container()
-                graph_measure.write('#### Graph')
+                graph_measure.write('#### ' + str(recon) + '\n' + '##### ' + str(measure))
                 graph_data = data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, str(measure)]
                 graph_measure.bar_chart(graph_data)
