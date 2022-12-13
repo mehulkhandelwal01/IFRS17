@@ -1,0 +1,6 @@
+*.md
+venv/
+virtualenv/
+.git/
+.gitlab-ci.yml
+notebook/
