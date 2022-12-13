@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from IFRS17.gmm import GMM
 
-st.set_page_config(page_title="Actuartech IFRS 17 Data Management")
+st.set_page_config(page_title="Actuartech IFRS 17 Data Management", layout="wide")
 
 hide_menu_style = """
         <style>
@@ -39,13 +39,11 @@ with load_tab:
             container_data.subheader('Parameters file')
             container_data.write(parameters)
         with dashboard_tab:
-            #st.subheader('Dashboard')
-            recon_container = st.container()
-            recon_container.write('#### Reconciliation Account')
-            recon = recon_container.selectbox('#### ', ('Reconciliation of Best Estimate Liability', 'Reconciliation of Contractual Service Margin', 'Reconciliation of Risk Adjustment', 'Reconciliation of Total Contract Liability'))
-            year_col, measure_col, table_col, recon_col = st.columns(4)
-            with year_col:
-                st.write('#### Year')
+            recon_col, sub_col, year_col = st.columns(3)
+            with recon_col:
+                recon_container = st.container()
+                recon_container.write('#### Reconciliation Account')
+                recon = recon_container.selectbox('#### ', ('Reconciliation of Best Estimate Liability', 'Reconciliation of Contractual Service Margin', 'Reconciliation of Risk Adjustment', 'Reconciliation of Total Contract Liability'))
                 g = GMM(assumptions, parameters)
                 if recon == "Reconciliation of Best Estimate Liability":
                     data = g.BEL
@@ -55,24 +53,31 @@ with load_tab:
                     data = g.RA
                 elif recon == "Reconciliation of Total Contract Liability":
                     data = g.TCL
-            min_year = int(min(np.array(data.index)))
-            max_year = int(max(np.array(data.index)))
-            years = st.slider('#### ', min_year, max_year, (min_year, min_year+1))
-            year_range = range(years[0], years[len(years)-1]+1)
             
-            st.write('#### Subproduct')
-            subproduct = st.radio('#### ', tuple(np.unique(data['Sub-Product'])))
+            with sub_col:
+                st.write('#### Subproduct')
+                subproduct = st.radio('#### ', tuple(np.unique(data['Sub-Product'])))
+
+            with year_col:
+                st.write('#### Year')
+                min_year = int(min(np.array(data.index)))
+                max_year = int(max(np.array(data.index)))
+                years = st.slider('#### ', min_year, max_year, (min_year, min_year+1))
+                year_range = range(years[0], years[len(years)-1]+1)
 
             st.write(str('#### ' + str(recon)))
-            st.dataframe(data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, :], use_container_width=True) 
-
-            container_measure = st.container()
-            container_measure.write('#### Measure')
-            measure_values = data.columns
-            list_of_measures = tuple(measure_values[2:len(measure_values)])
-            measure = container_measure.radio("#### ", list_of_measures)
-
-            graph_measure = st.container()
-            graph_measure.write('#### Graph')
-            graph_data = data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, str(measure)]
-            graph_measure.bar_chart(graph_data)
+            st.dataframe(data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, :]) 
+            
+            measure_col, graph_col = st.columns(2)
+            with measure_col:
+                container_measure = st.container()
+                container_measure.write('#### Measure')
+                measure_values = data.columns
+                list_of_measures = tuple(measure_values[2:len(measure_values)])
+                measure = container_measure.radio("#### ", list_of_measures)
+            
+            with graph_col:
+                graph_measure = st.container()
+                graph_measure.write('#### Graph')
+                graph_data = data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, str(measure)]
+                graph_measure.bar_chart(graph_data)
