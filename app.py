@@ -39,22 +39,30 @@ with load_tab:
             with year_col:
                 st.write('#### Year')
                 g = GMM(assumptions, parameters)
-                min_year = np.min(g.Reconciliation_of_Best_Estimate_Liability.index)
-                max_year = np.max(g.Reconciliation_of_Best_Estimate_Liability.index)
+                if recon == "Reconciliation of Best Estimate Liability":
+                    data = g.Reconciliation_of_Best_Estimate_Liability
+                elif recon == "Reconciliation of Contractual Service Margin":
+                    data = g.Reconciliation_of_Contractual_Service_Margin
+                elif recon == "Reconciliation of Risk Adjustment":
+                    data = g.Reconciliation_of_Risk_Adjustment
+                elif recon == "Reconciliation of Total Contract Liability":
+                    data = g.Reconciliation_of_Total_Contract_Liability
+
+                min_year = np.min(data.index)
+                max_year = np.max(data.index)
                 years = st.slider('Year:', min_year, max_year, (min_year, min_year+1))
-                #years = st.slider('Year:', 2019, 2022, (2019, 2019+1))
             with table_col:
-                st.write('#### Reconciliation of Best Estimate Liability')
-                st.dataframe(g.Reconciliation_of_Best_Estimate_Liability) 
+                st.write(str('#### ' + str(recon)))
+                st.dataframe(data) 
 
             container_measure = st.container()
             container_measure.write('#### Measure')
-            measure_values = g.Reconciliation_of_Best_Estimate_Liability.columns
+            measure_values = data.columns
             list_of_measures = tuple(measure_values[2:len(measure_values)])
-            measure = container_measure.radio("Measure", list_of_measures)
+            measure = container_measure.radio("#### Measure", list_of_measures)
 
             graph_measure = st.container()
             graph_measure.write('#### Graph')
             year_range = range(years[0], years[len(years)-1]+1)
-            graph_data = g.Reconciliation_of_Best_Estimate_Liability.loc[year_range, str(measure)]
+            graph_data = data.loc[year_range, str(measure)]
             graph_measure.bar_chart(graph_data)
