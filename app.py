@@ -48,21 +48,23 @@ with load_tab:
                 st.write('#### Year')
                 g = GMM(assumptions, parameters)
                 if recon == "Reconciliation of Best Estimate Liability":
-                    data = g.Reconciliation_of_Best_Estimate_Liability
+                    data = g.BEL
                 elif recon == "Reconciliation of Contractual Service Margin":
-                    data = g.Reconciliation_of_Contractual_Service_Margin
+                    data = g.CSM
                 elif recon == "Reconciliation of Risk Adjustment":
-                    data = g.Reconciliation_of_Risk_Adjustment
+                    data = g.RA
                 elif recon == "Reconciliation of Total Contract Liability":
-                    data = g.Reconciliation_of_Total_Contract_Liability
-
-            min_year = np.min(data.index)
-            max_year = np.max(data.index)
+                    data = g.TCL
+            min_year = int(min(np.array(data.index)))
+            max_year = int(max(np.array(data.index)))
             years = st.slider('#### ', min_year, max_year, (min_year, min_year+1))
             year_range = range(years[0], years[len(years)-1]+1)
+            
+            st.write('#### Subproduct')
+            subproduct = st.radio('#### ', tuple(np.unique(data['Sub-Product'])))
 
             st.write(str('#### ' + str(recon)))
-            st.dataframe(data.loc[year_range, :], use_container_width=True) 
+            st.dataframe(data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, :], use_container_width=True) 
 
             container_measure = st.container()
             container_measure.write('#### Measure')
@@ -72,5 +74,5 @@ with load_tab:
 
             graph_measure = st.container()
             graph_measure.write('#### Graph')
-            graph_data = data.loc[year_range, str(measure)]
+            graph_data = data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, str(measure)]
             graph_measure.bar_chart(graph_data)
