@@ -3,8 +3,8 @@ __pycache__/
 env/
 virtualenv/
 .ipynb_checkpoints/
-src/.ipynb_checkpoints/
-src/venv/
-src/virtualenv/
-src/__pycache__/
+notebook/.ipynb_checkpoints/
+notebook/venv/
+notebook/virtualenv/
+notebook/__pycache__/
 IFRS17/__pycache__/
