@@ -1,5 +1,5 @@
 """
-# Basic dashboard
+# Actuartech IFRS 17 Dashboard
 """
 import streamlit as st
 import pandas as pd
@@ -7,7 +7,7 @@ import numpy as np
 from IFRS17.gmm import GMM
 
 st.set_page_config(page_title="Actuartech IFRS 17 Data Management", layout="wide")
-st.image("assets/actuartech-logo.png", width=400)
+st.image("assets/actuartech-logo.png")
 
 hide_menu_style = """
         <style>
@@ -28,6 +28,7 @@ def convert_df(df):
     return df.to_csv(index=False).encode('utf-8')
 
 load_tab, dashboard_tab, about_tab = st.tabs(["Load Data", "Dashboard", "About Us"])
+
 with about_tab:
     st.write("Placeholder for About Us text")
 
