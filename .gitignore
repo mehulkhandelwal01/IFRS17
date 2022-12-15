@@ -8,3 +8,4 @@ notebook/venv/
 notebook/virtualenv/
 notebook/__pycache__/
 IFRS17/__pycache__/
+*.csv
