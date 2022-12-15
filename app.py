@@ -107,5 +107,4 @@ with load_tab:
                 graph_waterfall.write('#### ' + str(recon) + '\n' + '##### Waterfall')
                 waterfall_data = table_data.transpose()[year_range[0]]
                 waterfall_data = waterfall_data.iloc[2:len(waterfall_data)]
-                print(waterfall_data)
                 graph_waterfall.bar_chart(waterfall_data)
