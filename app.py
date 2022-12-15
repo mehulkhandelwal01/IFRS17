@@ -4,6 +4,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import altair as alt
 from IFRS17.gmm import GMM
 
 st.set_page_config(page_title="Actuartech IFRS 17 Data Management", layout="wide")
@@ -101,10 +102,17 @@ with load_tab:
                         "text/csv",
                         key="download-csv"
                         )
-
+            
             with waterfall_col:
                 graph_waterfall = st.container()
-                graph_waterfall.write('#### ' + str(recon) + '\n' + '##### Waterfall')
-                waterfall_data = table_data.transpose()[year_range[0]]
+                graph_waterfall.write('#### ' + str(recon) + '\n' + '##### Waterfall Chart - ' + str(year_range[0]) + " Reporting Period")
+                waterfall_data = pd.DataFrame(table_data.transpose()[year_range[0]])
                 waterfall_data = waterfall_data.iloc[2:len(waterfall_data)]
-                graph_waterfall.bar_chart(waterfall_data)
+                waterfall_data.index.name = "Account"
+                waterfall_data.reset_index(inplace=True)
+                waterfall_data.columns = ['  ', ' ']
+                waterfall_plot = alt.Chart(waterfall_data).mark_bar().encode(
+                        x=alt.X('  ', sort=None),
+                        y=' '
+                        )
+                st.altair_chart(waterfall_plot, use_container_width=True)
