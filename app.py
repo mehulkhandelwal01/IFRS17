@@ -28,7 +28,7 @@ def convert_df(df):
 
 load_tab, dashboard_tab, about_tab = st.tabs(["Load Data", "Dashboard", "About Us"])
 with about_tab:
-    st.write("About")
+    st.write("Placeholder for About Us text")
 
 with load_tab:
     st.subheader("Upload your data")
@@ -93,7 +93,7 @@ with load_tab:
                 file_name = str("ifrs17" + "-" + str(subproduct) + "-" + str(measure) + "-" + str(years[0]) + "-" + str(years[1]) + ".csv")
                 csv = convert_df(table_data)
                 st.download_button(
-                        "Download Current Filter as CSV",
+                        "📥 Download Current Filter as CSV",
                         csv,
                         file_name,
                         "text/csv",
