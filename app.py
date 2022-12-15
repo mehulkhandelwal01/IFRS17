@@ -1,7 +1,6 @@
 """
 # Basic dashboard
 """
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -23,7 +22,13 @@ def load_data(file):
     data = pd.read_csv(file)
     return data
 
-load_tab, dashboard_tab = st.tabs(["Load Data", "Dashboard"])
+@st.experimental_memo
+def convert_df(df):
+    return df.to_csv(index=False).encode('utf-8')
+
+load_tab, dashboard_tab, about_tab = st.tabs(["Load Data", "Dashboard", "About Us"])
+with about_tab:
+    st.write("About")
 
 with load_tab:
     st.subheader("Upload your data")
@@ -66,7 +71,8 @@ with load_tab:
                 year_range = range(years[0], years[len(years)-1]+1)
 
             st.write(str('#### ' + str(recon)))
-            st.dataframe(data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, :]) 
+            table_data = data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, :] 
+            st.dataframe(table_data)
             
             measure_col, graph_col = st.columns(2)
             with measure_col:
@@ -81,3 +87,22 @@ with load_tab:
                 graph_measure.write('#### ' + str(recon) + '\n' + '##### ' + str(measure))
                 graph_data = data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, str(measure)]
                 graph_measure.bar_chart(graph_data)
+            
+            download_col, empty_col = st.columns(2)
+            with download_col:
+                file_name = str("ifrs17" + "-" + str(subproduct) + "-" + str(measure) + "-" + str(years[0]) + "-" + str(years[1]) + ".csv")
+                csv = convert_df(table_data)
+                st.download_button(
+                        "Download Current Filter as CSV",
+                        csv,
+                        file_name,
+                        "text/csv",
+                        key="download-csv"
+                        )
+            #with open("ifrs17output.zip", "rb") as fp:
+            #    btn = st.download_button(
+            #            label="Download IFRS 17 Output",
+            #            data=fp,
+            #            file_name="ifrs17output.zip",
+            #            mime="application/zip"
+            #            )
