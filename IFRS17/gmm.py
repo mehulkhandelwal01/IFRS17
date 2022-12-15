@@ -734,7 +734,7 @@ class GMM:
                                 i, "Changes Related to Past Service"]
                 self.Reconciliation_of_Total_Contract_Liability.loc[
                     i,
-                    "CLOSING"] = self.Reconciliation_of_Best_Estimate_Liability.loc[
+                    "Closing Balance"] = self.Reconciliation_of_Best_Estimate_Liability.loc[
                         i,
                         "Closing Balance"] + self.Reconciliation_of_Risk_Adjustment.loc[
                             i,
