@@ -66,7 +66,7 @@ with load_tab:
                 subproduct = st.radio('#### ', tuple(np.unique(data['Sub-Product'])))
 
             with year_col:
-                st.write('#### Year')
+                st.write('#### Reporting Period')
                 min_year = int(min(np.array(data.index)))
                 max_year = int(max(np.array(data.index)))
                 years = st.slider('#### ', min_year, max_year, (min_year, min_year+1))
@@ -90,7 +90,7 @@ with load_tab:
                 graph_data = data.loc[data["Sub-Product"] == str(subproduct)].loc[year_range, str(measure)]
                 graph_measure.bar_chart(graph_data)
             
-            download_col, empty_col = st.columns(2)
+            download_col, waterfall_col = st.columns(2)
             with download_col:
                 file_name = str("ifrs17" + "-" + str(subproduct) + "-" + str(measure) + "-" + str(years[0]) + "-" + str(years[1]) + ".csv")
                 csv = convert_df(table_data)
@@ -101,10 +101,11 @@ with load_tab:
                         "text/csv",
                         key="download-csv"
                         )
-            #with open("ifrs17output.zip", "rb") as fp:
-            #    btn = st.download_button(
-            #            label="Download IFRS 17 Output",
-            #            data=fp,
-            #            file_name="ifrs17output.zip",
-            #            mime="application/zip"
-            #            )
+
+            with waterfall_col:
+                graph_waterfall = st.container()
+                graph_waterfall.write('#### ' + str(recon) + '\n' + '##### Waterfall')
+                waterfall_data = table_data.transpose()[year_range[0]]
+                waterfall_data = waterfall_data.iloc[2:len(waterfall_data)]
+                print(waterfall_data)
+                graph_waterfall.bar_chart(waterfall_data)
