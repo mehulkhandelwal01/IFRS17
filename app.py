@@ -7,7 +7,7 @@ import numpy as np
 from IFRS17.gmm import GMM
 
 st.set_page_config(page_title="Actuartech IFRS 17 Data Management", layout="wide")
-st.image("assets/actuartech-logo.png")
+st.image("assets/actuartech-logo.png", width=400)
 
 hide_menu_style = """
         <style>
