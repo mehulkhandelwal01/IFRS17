@@ -107,7 +107,7 @@ class GMM:
                     'CSM recognised in profit or loss for the services provided',
                     'Risk Adjustment recognised for the risk expired',
                     'Experience adjustments',
-                   'Changes that relate to current service',
+                    'Changes that relate to current service',
                     'Changes in estimates that adjust the CSM',
                     'Changes in estimates that result in onerous contract losses or reversal of losses',
                     'Contracts initially recognised in the period',
@@ -734,7 +734,7 @@ class GMM:
                                 i, "Changes Related to Past Service"]
                 self.Reconciliation_of_Total_Contract_Liability.loc[
                     i,
-                    "Closing Balance"] = self.Reconciliation_of_Best_Estimate_Liability.loc[
+                    "CLOSING"] = self.Reconciliation_of_Best_Estimate_Liability.loc[
                         i,
                         "Closing Balance"] + self.Reconciliation_of_Risk_Adjustment.loc[
                             i,
@@ -1695,11 +1695,11 @@ class GMM:
         self.TCL = pd.concat(self.TCL)
         self.AMC = pd.concat(self.AMC)
         
-        #self.BEL = self.BEL.to_csv('Reconciliation_of_Best_Estimate_Liability.csv')
-        #self.RA = self.RA.to_csv('Reconciliation_of_Best_Estimate_Liability.csv')
-        #self.CSM = self.CSM.to_csv('Reconciliation_of_Contractual_Service_Margin.csv')
-        #self.TCL = self.TCL.to_csv('Reconciliation_of_Total_Contract_Liability.csv')
-        #self.AMC = self.AMC.to_csv('Analysis_by_measurement_component.csv')
+        self.BEL = self.BEL.to_csv('Reconciliation_of_Best_Estimate_Liability.csv')
+        self.RA = self.RA.to_csv('Reconciliation_of_Best_Estimate_Liability.csv')
+        self.CSM = self.CSM.to_csv('Reconciliation_of_Contractual_Service_Margin.csv')
+        self.TCL = self.TCL.to_csv('Reconciliation_of_Total_Contract_Liability.csv')
+        self.AMC = self.AMC.to_csv('Analysis_by_measurement_component.csv')
 
 
         # Analysis by remaining Coverage
@@ -4936,7 +4936,7 @@ class GMM:
                          "Liabilities for incurred claims"),
                         "Net balance at 31 December"]
 
-                self.ARC.append(self.Analysis_by_remaining_coverage)
+            self.ARC.append(self.Analysis_by_remaining_coverage)
 
         self.ARC = pd.concat(self.ARC)
-        #self.ARC = self.ARC.to_csv('Analysis_by_remaining_coverage.csv') 
+        self.ARC = self.ARC.to_csv('Analysis_by_remaining_coverage.csv')
