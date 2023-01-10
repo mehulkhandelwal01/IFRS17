@@ -23,5 +23,5 @@ streamlit run app.py
 ```
 
 ## TODO
-- [ ] Add .py version of the code to run the class as a module -- CURRENTLY HOLD-OVER SOLUTION
+- [x] Add .py version of the code to run the class as a module
 - [x] Update Streamlit dashboard to meet requirements
