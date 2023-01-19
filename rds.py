@@ -21,7 +21,6 @@ def run_query(query):
 
 rows = run_query("SELECT * from BEL;")
 headers = run_query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'BEL';")
-headers = pd.DataFrame(headers
 st.write(pd.DataFrame(rows,columns=[headers]))
 
 # Print results.
