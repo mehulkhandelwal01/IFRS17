@@ -1,16 +1,12 @@
 import pandas as pd
 import numpy as np
-from functools import reduce
-import os
-from os import path
 from datetime import datetime
-from dateutil import relativedelta
-from csv import writer
 
 
 class GMM:
 
     def __init__(self, assumptions, parameters):
+        
         data = pd.pivot_table(
             assumptions,
             index=['Cohort', 'Product', 'Sub-Product', 'Key'],
@@ -40,12 +36,12 @@ class GMM:
 
         self.Parameters = parameters
 
-        inception = datetime.strptime(self.Parameters.loc[0, "Selection"],
-                                      '%d/%m/%Y').year
-        start = datetime.strptime(self.Parameters.loc[1, "Selection"],
+        start = datetime.strptime(self.Parameters.loc[0, "Selection"],
                                   '%d/%m/%Y').year
-        end = datetime.strptime(self.Parameters.loc[2, "Selection"],
+        end = datetime.strptime(self.Parameters.loc[1, "Selection"],
                                 '%d/%m/%Y').year
+        
+        
         self.BEL = []
         self.RA = []
         self.CSM = []
@@ -109,7 +105,7 @@ class GMM:
                     'Experience adjustments',
                     'Changes that relate to current service',
                     'Changes in estimates that adjust the CSM',
-                    'Changes in estimates that result in onerous contract losses or reversal of losses',
+                    'Changes in onerous contract losses or reversal of losses',
                     'Contracts initially recognised in the period',
                     'Changes that relate to future service',
                     'Adjustments to liabilities for incurred claims',
@@ -138,10 +134,8 @@ class GMM:
                     "Period", "Product", "Sub-Product", "Measure",
                     'Net balance at 1 January',
                     'Changes in the statement of profit and loss and OCI',
-                    'Contracts under the modified retrospective transition approach',
-                    'Contracts under the fair value transition approach',
-                    'Other contracts',
-                    'Expected incurred claims and other insurance services expenses',
+                    'Other contracts recognised',
+                    'Expected incurred claims and Expenses',
                     'Amortisation of insurance acquisition cash flows',
                     'Losses and reversals of losses on onerous contracts',
                     'Adjustments to liabilities for incurred claims',
@@ -151,122 +145,122 @@ class GMM:
                     'Investment components and premium refunds',
                     'Total changes in the statement of profit and loss and OCI',
                     'Premiums received',
-                    'Claims and other insurance services expenses paid, including investment components',
+                    'Actual claims and other expenses paid',
                     'Insurance acquisition cash flows', 'Total cash flows',
-                    'Transfer to other items in the statement of financial position',
+                    'Other items transfer in the statement of financial position',
                     'Net balance at 31 December'
                 ])
 
             # Liability on Initial Recognition
 
-            if self.Parameters.loc[3, "Selection"] == "Input":
+            if self.Parameters.loc[2, "Selection"] == "Input":
 
                 self.Liability_on_Initial_Recognition.loc[
-                    inception, "CSM at Initial Recognition"] = iferror(
+                    start, "CSM at Initial Recognition"] = iferror(
                         self.Assumptions.loc[
                             (self.Assumptions['Key'] == 'MAP004') &
-                            (self.Assumptions['Cohort'] == inception),
+                            (self.Assumptions['Cohort'] == start),
                             'Gross_CSM'])
                 self.Liability_on_Initial_Recognition.loc[
-                    inception,
+                    start,
                     "LIABILITY ON INITIAL RECOGNITION-BE"] = iferror(
                         self.Assumptions.loc[
                             (self.Assumptions['Key'] == 'MAP004') &
-                            (self.Assumptions['Cohort'] == inception),
+                            (self.Assumptions['Cohort'] == start),
                             'Gross_LossC_BE'])
                 self.Liability_on_Initial_Recognition.loc[
-                    inception,
+                    start,
                     "LIABILITY ON INITIAL RECOGNITION-RA"] = iferror(
                         self.Assumptions.loc[
                             (self.Assumptions['Key'] == 'MAP004') &
-                            (self.Assumptions['Cohort'] == inception),
+                            (self.Assumptions['Cohort'] == start),
                             'Gross_LossC_RA'])
 
-            elif self.Parameters.loc[3, "Selection"] == "Calculation":
+            elif self.Parameters.loc[2, "Selection"] == "Calculation":
 
                 self.Liability_on_Initial_Recognition.loc[
-                    inception, "PV Premium"] = iferror(self.Assumptions.loc[
+                    start, "PV Premium"] = iferror(self.Assumptions.loc[
                         (self.Assumptions['Key'] == 'MAP003') &
-                        (self.Assumptions['Cohort'] == inception),
+                        (self.Assumptions['Cohort'] == start),
                         'Gross_BECFPV'])
                 self.Liability_on_Initial_Recognition.loc[
-                    inception, "PV Claims"] = iferror(self.Assumptions.loc[
+                    start, "PV Claims"] = iferror(self.Assumptions.loc[
                         (self.Assumptions['Key'] == 'MAP013') &
-                        (self.Assumptions['Cohort'] == inception),
+                        (self.Assumptions['Cohort'] == start),
                         'Gross_BECFPV'])
                 self.Liability_on_Initial_Recognition.loc[
-                    inception,
+                    start,
                     "PV Risk Adjustment"] = iferror(self.Assumptions.loc[
                         (self.Assumptions['Key'] == 'MAP013') &
-                        (self.Assumptions['Cohort'] == inception),
+                        (self.Assumptions['Cohort'] == start),
                         'Gross_RACFPV'])
                 self.Liability_on_Initial_Recognition.loc[
-                    inception,
+                    start,
                     "PV Acquisition Expense"] = iferror(self.Assumptions.loc[
                         (self.Assumptions['Key'] == 'MAP016') &
-                        (self.Assumptions['Cohort'] == inception),
+                        (self.Assumptions['Cohort'] == start),
                         'Gross_BECFPV'])
                 Total = self.Liability_on_Initial_Recognition.loc[
-                    inception,
+                    start,
                     "PV Premium"] + self.Liability_on_Initial_Recognition.loc[
-                        inception,
+                        start,
                         "PV Claims"] + self.Liability_on_Initial_Recognition.loc[
-                            inception,
+                            start,
                             "PV Risk Adjustment"] + self.Liability_on_Initial_Recognition.loc[
-                                inception, "PV Acquisition Expense"]
+                                start, "PV Acquisition Expense"]
 
                 if Total > 0:
                     self.Liability_on_Initial_Recognition.loc[
-                        inception, "CSM at Initial Recognition"] = Total
+                        start, "CSM at Initial Recognition"] = Total
                     self.Liability_on_Initial_Recognition.loc[
-                        inception, "LIABILITY ON INITIAL RECOGNITION-BE"] = 0
+                        start, "LIABILITY ON INITIAL RECOGNITION-BE"] = 0
                     self.Liability_on_Initial_Recognition.loc[
-                        inception, "LIABILITY ON INITIAL RECOGNITION-RA"] = 0
+                        start, "LIABILITY ON INITIAL RECOGNITION-RA"] = 0
 
                 else:
                     self.Liability_on_Initial_Recognition.loc[
-                        inception, "CSM at Initial Recognition"] = 0
+                        start, "CSM at Initial Recognition"] = 0
                     self.Liability_on_Initial_Recognition.loc[
-                        inception,
+                        start,
                         "LIABILITY ON INITIAL RECOGNITION-BE"] = (Total * (
                             (iferror(self.Assumptions.loc[
                                 (self.Assumptions['Key'] == 'MAP013') &
-                                (self.Assumptions['Cohort'] == inception),
+                                (self.Assumptions['Cohort'] == start),
                                 'Gross_BECFPV'])) /
                             (iferror(self.Assumptions.loc[
                                 (self.Assumptions['Key'] == 'MAP013') &
-                                (self.Assumptions['Cohort'] == inception),
+                                (self.Assumptions['Cohort'] == start),
                                 'Gross_BECFPV']) +
                              iferror(self.Assumptions.loc[
                                  (self.Assumptions['Key'] == 'MAP013') &
-                                 (self.Assumptions['Cohort'] == inception),
+                                 (self.Assumptions['Cohort'] == start),
                                  'Gross_RACFPV']))))
                     self.Liability_on_Initial_Recognition.loc[
-                        inception,
+                        start,
                         "LIABILITY ON INITIAL RECOGNITION-RA"] = (Total * (
                             (iferror(self.Assumptions.loc[
                                 (self.Assumptions['Key'] == 'MAP013') &
-                                (self.Assumptions['Cohort'] == inception),
+                                (self.Assumptions['Cohort'] == start),
                                 'Gross_RACFPV'])) /
                             (iferror(self.Assumptions.loc[
                                 (self.Assumptions['Key'] == 'MAP013') &
-                                (self.Assumptions['Cohort'] == inception),
+                                (self.Assumptions['Cohort'] == start),
                                 'Gross_BECFPV']) +
                              iferror(self.Assumptions.loc[
                                  (self.Assumptions['Key'] == 'MAP013') &
-                                 (self.Assumptions['Cohort'] == inception),
+                                 (self.Assumptions['Cohort'] == start),
                                  'Gross_RACFPV']))))
 
             # Reconciliation of Best Estimate Liability
 
             for i in range(start, end + 1):
-                if i == inception:
+                
+
+                if i == start:
                     self.Reconciliation_of_Best_Estimate_Liability.loc[
-                        i,
-                        "Opening Balance"] = self.Reconciliation_of_Best_Estimate_Liability.loc[
-                            i - 1, "Closing Balance"]
-                    if self.Liability_on_Initial_Recognition.loc[
-                            i, "LIABILITY ON INITIAL RECOGNITION-BE"] == 0:
+                        i, "Opening Balance"] = 0
+                    if self.Liability_on_Initial_Recognition.loc[i, "LIABILITY ON INITIAL RECOGNITION-BE"] == 0:
+                        
                         self.Reconciliation_of_Best_Estimate_Liability.loc[
                             i,
                             "Changes Related to Future Service: New Business"] = iferror(
@@ -278,11 +272,9 @@ class GMM:
                         self.Reconciliation_of_Best_Estimate_Liability.loc[
                             i,
                             "Changes Related to Future Service: New Business"] = self.Liability_on_Initial_Recognition.loc[
-                                inception,
+                                start,
                                 "LIABILITY ON INITIAL RECOGNITION-BE"]
-                elif i == start:
-                    self.Reconciliation_of_Best_Estimate_Liability.loc[
-                        i, "Opening Balance"] = 0
+
                 else:
                     self.Reconciliation_of_Best_Estimate_Liability.loc[
                         i,
@@ -421,11 +413,10 @@ class GMM:
             # Reconciliation of Risk Adjustment
 
             for i in range(start, end + 1):
-                if i == inception:
+                if i == start:
                     self.Reconciliation_of_Risk_Adjustment.loc[
                         i,
-                        "Opening Balance"] = self.Reconciliation_of_Risk_Adjustment.loc[
-                            i - 1, "Closing Balance"]
+                        "Opening Balance"] = 0
                     if self.Liability_on_Initial_Recognition.loc[
                             i, "LIABILITY ON INITIAL RECOGNITION-RA"] == 0:
                         self.Reconciliation_of_Risk_Adjustment.loc[
@@ -440,9 +431,6 @@ class GMM:
                             i,
                             "Changes Related to Future Service: New Business"] = self.Liability_on_Initial_Recognition.loc[
                                 start, "LIABILITY ON INITIAL RECOGNITION-RA"]
-                elif i == start:
-                    self.Reconciliation_of_Risk_Adjustment.loc[
-                        i, "Opening Balance"] = 0
 
                 else:
                     self.Reconciliation_of_Risk_Adjustment.loc[
@@ -582,11 +570,10 @@ class GMM:
             # Reconciliation of Contractual Service Margin
 
             for i in range(start, end + 1):
-                if i == inception:
+                if i == start:
                     self.Reconciliation_of_Contractual_Service_Margin.loc[
                         i,
-                        "Opening Balance"] = self.Reconciliation_of_Contractual_Service_Margin.loc[
-                            i - 1, "Closing Balance"]
+                        "Opening Balance"] = 0
                     self.Reconciliation_of_Contractual_Service_Margin.loc[
                         i,
                         "Changes Related to Future Service: New Business"] = iferror(
@@ -594,9 +581,6 @@ class GMM:
                                 (self.Assumptions['Key'] == 'MAP004')
                                 & (self.Assumptions['Cohort'] == i),
                                 'Gross_CSM']))
-                elif i == start:
-                    self.Reconciliation_of_Contractual_Service_Margin.loc[
-                        i, "Opening Balance"] = 0
 
                 else:
                     self.Reconciliation_of_Contractual_Service_Margin.loc[
@@ -767,7 +751,7 @@ class GMM:
                             0,
                             'Changes in estimates that adjust the CSM':
                             0,
-                            'Changes in estimates that result in onerous contract losses or reversal of losses':
+                            'Changes in onerous contract losses or reversal of losses':
                             0,
                             'Contracts initially recognised in the period':
                             0,
@@ -1171,7 +1155,7 @@ class GMM:
                 ) & (
                     self.Analysis_by_measurement_component['Measure'] ==
                     "Present value of future cash flows"
-                ), "Changes in estimates that result in onerous contract losses or reversal of losses"] = iferror(
+                ), "Changes in onerous contract losses or reversal of losses"] = iferror(
                     self.Assumptions.loc[
                         (self.Assumptions['Key'] == 'MAP018') &
                         (self.Assumptions['Cohort'] == i),
@@ -1184,7 +1168,7 @@ class GMM:
                 ) & (
                     self.Analysis_by_measurement_component['Measure'] ==
                     "Risk Adjustment"
-                ), "Changes in estimates that result in onerous contract losses or reversal of losses"] = iferror(
+                ), "Changes in onerous contract losses or reversal of losses"] = iferror(
                     self.Assumptions.loc[
                         (self.Assumptions['Key'] == 'MAP018') &
                         (self.Assumptions['Cohort'] == i),
@@ -1197,7 +1181,7 @@ class GMM:
                 ) & (
                     self.Analysis_by_measurement_component['Measure'] ==
                     "Contractual Service Margin"
-                ), "Changes in estimates that result in onerous contract losses or reversal of losses"] = iferror(
+                ), "Changes in onerous contract losses or reversal of losses"] = iferror(
                     self.Assumptions.loc[(self.Assumptions['Key'] == 'MAP018')
                                          & (self.Assumptions['Cohort'] == i),
                                          'Gross_CSM'])
@@ -1228,7 +1212,7 @@ class GMM:
                     self.Analysis_by_measurement_component['Period'] == i
                 ), "Changes in estimates that adjust the CSM"] + self.Analysis_by_measurement_component.loc[
                     (self.Analysis_by_measurement_component['Period'] == i),
-                    "Changes in estimates that result in onerous contract losses or reversal of losses"] + self.Analysis_by_measurement_component.loc[
+                    "Changes in onerous contract losses or reversal of losses"] + self.Analysis_by_measurement_component.loc[
                         (self.Analysis_by_measurement_component['Period'] == i
                          ), "Contracts initially recognised in the period"]
                 self.Analysis_by_measurement_component.loc[(
@@ -1256,21 +1240,21 @@ class GMM:
                 ) & (
                     self.Analysis_by_measurement_component['Measure'] ==
                     "Total"
-                ), "Changes in estimates that result in onerous contract losses or reversal of losses"] = self.Analysis_by_measurement_component.loc[
+                ), "Changes in onerous contract losses or reversal of losses"] = self.Analysis_by_measurement_component.loc[
                     (self.Analysis_by_measurement_component['Period'] == i) &
                     (self.Analysis_by_measurement_component['Measure'] ==
                      "Present value of future cash flows"),
-                    "Changes in estimates that result in onerous contract losses or reversal of losses"] + self.Analysis_by_measurement_component.loc[
+                    "Changes in onerous contract losses or reversal of losses"] + self.Analysis_by_measurement_component.loc[
                         (self.Analysis_by_measurement_component['Period'] == i)
                         & (self.Analysis_by_measurement_component['Measure'] ==
                            "Risk Adjustment"),
-                        "Changes in estimates that result in onerous contract losses or reversal of losses"] + self.Analysis_by_measurement_component.loc[
+                        "Changes in onerous contract losses or reversal of losses"] + self.Analysis_by_measurement_component.loc[
                             (self.
                              Analysis_by_measurement_component['Period'] == i)
                             &
                             (self.Analysis_by_measurement_component['Measure']
                              == "Contractual Service Margin"),
-                            "Changes in estimates that result in onerous contract losses or reversal of losses"]
+                            "Changes in onerous contract losses or reversal of losses"]
                 self.Analysis_by_measurement_component.loc[(
                     self.Analysis_by_measurement_component['Period'] == i
                 ) & (
@@ -1696,11 +1680,16 @@ class GMM:
         self.AMC = pd.concat(self.AMC)
         
         self.BEL = self.BEL.to_csv('Reconciliation_of_Best_Estimate_Liability.csv')
-        self.RA = self.RA.to_csv('Reconciliation_of_Best_Estimate_Liability.csv')
+        self.RA = self.RA.to_csv('Reconciliation_of_Risk_Adjustment.csv')
         self.CSM = self.CSM.to_csv('Reconciliation_of_Contractual_Service_Margin.csv')
         self.TCL = self.TCL.to_csv('Reconciliation_of_Total_Contract_Liability.csv')
         self.AMC = self.AMC.to_csv('Analysis_by_measurement_component.csv')
-
+        df_BEL = pd.DataFrame(self.BEL)
+        df_RA = pd.DataFrame(self.RA)
+        df_CSM = pd.DataFrame(self.CSM)
+        df_TCL = pd.DataFrame(self.TCL)
+        df_AMC = pd.DataFrame(self.AMC)
+        
 
         # Analysis by remaining Coverage
         data_2 = pd.pivot_table(
@@ -1736,119 +1725,119 @@ class GMM:
 
             for i in range(start, end + 1):
 
-                if self.Parameters.loc[3, "Selection"] == "Input":
+                if self.Parameters.loc[2, "Selection"] == "Input":
 
                     self.Liability_on_Initial_Recognition.loc[
-                        inception, "CSM at Initial Recognition"] = iferror(
+                        start, "CSM at Initial Recognition"] = iferror(
                             self.Assumptions.loc[
                                 (self.Assumptions['Key'] == 'MAP004') &
-                                (self.Assumptions['Cohort'] == inception) &
+                                (self.Assumptions['Cohort'] == start) &
                                 (self.Assumptions['BusinessType'] == 'NB') &
                                 (self.Assumptions['BusinessType'] == 'NB'),
                                 'Gross_CSM'])
                     self.Liability_on_Initial_Recognition.loc[
-                        inception,
+                        start,
                         "LIABILITY ON INITIAL RECOGNITION-BE"] = iferror(
                             self.Assumptions.loc[
                                 (self.Assumptions['Key'] == 'MAP004') &
-                                (self.Assumptions['Cohort'] == inception) &
+                                (self.Assumptions['Cohort'] == start) &
                                 (self.Assumptions['BusinessType'] == 'NB'),
                                 'Gross_LossC_BE'])
                     self.Liability_on_Initial_Recognition.loc[
-                        inception,
+                        start,
                         "LIABILITY ON INITIAL RECOGNITION-RA"] = iferror(
                             self.Assumptions.loc[
                                 (self.Assumptions['Key'] == 'MAP004') &
-                                (self.Assumptions['Cohort'] == inception) &
+                                (self.Assumptions['Cohort'] == start) &
                                 (self.Assumptions['BusinessType'] == 'NB'),
                                 'Gross_LossC_RA'])
 
-                elif self.Parameters.loc[3, "Selection"] == "Calculation":
+                elif self.Parameters.loc[2, "Selection"] == "Calculation":
 
                     self.Liability_on_Initial_Recognition.loc[
-                        inception,
+                        start,
                         "PV Premium"] = iferror(self.Assumptions.loc[
                             (self.Assumptions['Key'] == 'MAP003') &
-                            (self.Assumptions['Cohort'] == inception) &
+                            (self.Assumptions['Cohort'] == start) &
                             (self.Assumptions['BusinessType'] == 'NB'),
                             'Gross_BECFPV'])
                     self.Liability_on_Initial_Recognition.loc[
-                        inception, "PV Claims"] = iferror(self.Assumptions.loc[
+                        start, "PV Claims"] = iferror(self.Assumptions.loc[
                             (self.Assumptions['Key'] == 'MAP013') &
-                            (self.Assumptions['Cohort'] == inception) &
+                            (self.Assumptions['Cohort'] == start) &
                             (self.Assumptions['BusinessType'] == 'NB'),
                             'Gross_BECFPV'])
                     self.Liability_on_Initial_Recognition.loc[
-                        inception,
+                        start,
                         "PV Risk Adjustment"] = iferror(self.Assumptions.loc[
                             (self.Assumptions['Key'] == 'MAP013') &
-                            (self.Assumptions['Cohort'] == inception) &
+                            (self.Assumptions['Cohort'] == start) &
                             (self.Assumptions['BusinessType'] == 'NB'),
                             'Gross_RACFPV'])
                     self.Liability_on_Initial_Recognition.loc[
-                        inception, "PV Acquisition Expense"] = iferror(
+                        start, "PV Acquisition Expense"] = iferror(
                             self.Assumptions.loc[
                                 (self.Assumptions['Key'] == 'MAP016') &
-                                (self.Assumptions['Cohort'] == inception) &
+                                (self.Assumptions['Cohort'] == start) &
                                 (self.Assumptions['BusinessType'] == 'NB'),
                                 'Gross_BECFPV'])
                     Total = self.Liability_on_Initial_Recognition.loc[
-                        inception,
+                        start,
                         "PV Premium"] + self.Liability_on_Initial_Recognition.loc[
-                            inception,
+                            start,
                             "PV Claims"] + self.Liability_on_Initial_Recognition.loc[
-                                inception,
+                                start,
                                 "PV Risk Adjustment"] + self.Liability_on_Initial_Recognition.loc[
-                                    inception, "PV Acquisition Expense"]
+                                    start, "PV Acquisition Expense"]
 
                     if Total > 0:
                         self.Liability_on_Initial_Recognition.loc[
-                            inception, "CSM at Initial Recognition"] = Total
+                            start, "CSM at Initial Recognition"] = Total
                         self.Liability_on_Initial_Recognition.loc[
-                            inception,
+                            start,
                             "LIABILITY ON INITIAL RECOGNITION-BE"] = 0
                         self.Liability_on_Initial_Recognition.loc[
-                            inception,
+                            start,
                             "LIABILITY ON INITIAL RECOGNITION-RA"] = 0
 
                     else:
                         self.Liability_on_Initial_Recognition.loc[
-                            inception, "CSM at Initial Recognition"] = 0
+                            start, "CSM at Initial Recognition"] = 0
                         self.Liability_on_Initial_Recognition.loc[
-                            inception,
+                            start,
                             "LIABILITY ON INITIAL RECOGNITION-BE"] = (Total * (
                                 (iferror(self.Assumptions.loc[
                                     (self.Assumptions['Key'] == 'MAP013') &
-                                    (self.Assumptions['Cohort'] == inception) &
+                                    (self.Assumptions['Cohort'] == start) &
                                     (self.Assumptions['BusinessType'] == 'NB'),
                                     'Gross_BECFPV'])) /
                                 (iferror(self.Assumptions.loc[
                                     (self.Assumptions['Key'] == 'MAP013') &
-                                    (self.Assumptions['Cohort'] == inception) &
+                                    (self.Assumptions['Cohort'] == start) &
                                     (self.Assumptions['BusinessType'] == 'NB'),
                                     'Gross_BECFPV']) +
                                  iferror(self.Assumptions.loc[
                                      (self.Assumptions['Key'] == 'MAP013') &
-                                     (self.Assumptions['Cohort'] == inception)
+                                     (self.Assumptions['Cohort'] == start)
                                      &
                                      (self.Assumptions['BusinessType'] == 'NB'
                                       ), 'Gross_RACFPV']))))
                         self.Liability_on_Initial_Recognition.loc[
-                            inception,
+                            start,
                             "LIABILITY ON INITIAL RECOGNITION-RA"] = (Total * (
                                 (iferror(self.Assumptions.loc[
                                     (self.Assumptions['Key'] == 'MAP013') &
-                                    (self.Assumptions['Cohort'] == inception) &
+                                    (self.Assumptions['Cohort'] == start) &
                                     (self.Assumptions['BusinessType'] == 'NB'),
                                     'Gross_RACFPV'])) /
                                 (iferror(self.Assumptions.loc[
                                     (self.Assumptions['Key'] == 'MAP013') &
-                                    (self.Assumptions['Cohort'] == inception) &
+                                    (self.Assumptions['Cohort'] == start) &
                                     (self.Assumptions['BusinessType'] == 'NB'),
                                     'Gross_BECFPV']) +
                                  iferror(self.Assumptions.loc[
                                      (self.Assumptions['Key'] == 'MAP013') &
-                                     (self.Assumptions['Cohort'] == inception)
+                                     (self.Assumptions['Cohort'] == start)
                                      &
                                      (self.Assumptions['BusinessType'] == 'NB'
                                       ), 'Gross_RACFPV']))))
@@ -1871,11 +1860,7 @@ class GMM:
                             0,
                             'Changes in the statement of profit and loss and OCI':
                             0,
-                            'Contracts under the modified retrospective transition approach':
-                            0,
-                            'Contracts under the fair value transition approach':
-                            0,
-                            'Other contracts':
+                            'Other contracts recognised':
                             0,
                             'Expected incurred claims and other insurance services expenses':
                             0,
@@ -1897,13 +1882,13 @@ class GMM:
                             0,
                             'Premiums received':
                             0,
-                            'Claims and other insurance services expenses paid, including investment components':
+                            'Actual claims and other expenses paid':
                             0,
                             'Insurance acquisition cash flows':
                             0,
                             'Total cash flows':
                             0,
-                            'Transfer to other items in the statement of financial position':
+                            'Other items transfer in the statement of financial position':
                             0,
                             'Net balance at 31 December':
                             0
@@ -1986,1338 +1971,23 @@ class GMM:
                         (self.Analysis_by_remaining_coverage['Measure'] ==
                          "Total"), "Net balance at 31 December"]
 
-                if self.Parameters.loc[
-                        6, 'Selection'] == "Modified Retrospective Approach":
-
-                    self.Analysis_by_remaining_coverage.loc[(
+                self.Analysis_by_remaining_coverage.loc[(
                         self.Analysis_by_remaining_coverage['Period'] == i
                     ) & (
                         self.Analysis_by_remaining_coverage['Measure'] ==
                         "Liabilities for remaining coverage - Excluding loss component"
-                    ), "Contracts under the modified retrospective transition approach"] = self.Liability_on_Initial_Recognition.loc[
-                        i, "CSM at Initial Recognition"]
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for remaining coverage - Only Loss Component"
-                    ), "Contracts under the modified retrospective transition approach"] = self.Liability_on_Initial_Recognition.loc[
-                        i,
-                        "LIABILITY ON INITIAL RECOGNITION-BE"] + self.Liability_on_Initial_Recognition.loc[
-                            i, "LIABILITY ON INITIAL RECOGNITION-RA"]
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for incurred claims"
-                    ), "Contracts under the modified retrospective transition approach"] = 0
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Total"
-                    ), "Contracts under the modified retrospective transition approach"] = self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
-                        (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Excluding loss component"
-                         ),
-                        "Contracts under the modified retrospective transition approach"] + self.Analysis_by_remaining_coverage.loc[
-                            (self.Analysis_by_remaining_coverage['Period'] == i
-                             ) &
-                            (self.Analysis_by_remaining_coverage['Measure'] ==
-                             "Liabilities for remaining coverage - Only loss component"
-                             ),
-                            "Contracts under the modified retrospective transition approach"] + self.Analysis_by_remaining_coverage.loc[
-                                (self.
-                                 Analysis_by_remaining_coverage['Period'] == i)
-                                &
-                                (self.Analysis_by_remaining_coverage['Measure']
-                                 == "Liabilities for incurred claims"),
-                                "Contracts under the modified retrospective transition approach"]
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for remaining coverage - Excluding loss component"
-                    ), "Other contracts"] = iferror(
-                        self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP001') &
-                            (self.Assumptions['Cohort'] == i) &
-                            (self.Assumptions['BusinessType'] == 'NB'),
-                            'Gross_BE']
-                    ) + iferror(self.Assumptions.loc[
-                        (self.Assumptions['Key'] == 'MAP001') &
-                        (self.Assumptions['Cohort'] == i) &
-                        (self.Assumptions['BusinessType'] == 'NB'),
-                        'Gross_RA']) - iferror(self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP001') &
-                            (self.Assumptions['Cohort'] == i) &
-                            (self.Assumptions['BusinessType'] == 'NB'),
-                            'Gross_CSM']) + iferror(self.Assumptions.loc[
-                                (self.Assumptions['Key'] == 'MAP005') &
-                                (self.Assumptions['Cohort'] == i) &
-                                (self.Assumptions['BusinessType'] == 'NB'),
-                                'Gross_BE']) + iferror(self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP005') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'NB'),
-                                    'Gross_RA']) - iferror(
-                                        self.Assumptions.loc[
-                                            (self.Assumptions['Key'] ==
-                                             'MAP005') &
-                                            (self.Assumptions['Cohort'] == i) &
-                                            (self.Assumptions['BusinessType']
-                                             == 'NB'), 'Gross_CSM']
-                                    ) + iferror(self.Assumptions.loc[
-                                        (self.Assumptions['Key'] == 'MAP006') &
-                                        (self.Assumptions['Cohort'] == i) &
-                                        (self.Assumptions['BusinessType'] ==
-                                         'NB'), 'Gross_BE']) + iferror(
-                                             self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP006') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) &
-                                                 (self.
-                                                  Assumptions['BusinessType']
-                                                  == 'NB'), 'Gross_RA']
-                                         ) - iferror(self.Assumptions.loc[
-                                             (self.Assumptions['Key'] ==
-                                              'MAP006') &
-                                             (self.Assumptions['Cohort'] == i)
-                                             &
-                                             (self.Assumptions['BusinessType']
-                                              == 'NB'),
-                                             'Gross_CSM']) + iferror(
-                                                 self.Assumptions.loc[
-                                                     (self.Assumptions['Key']
-                                                      == 'MAP008') &
-                                                     (self.
-                                                      Assumptions['Cohort'] ==
-                                                      i) & (self.Assumptions[
-                                                          'BusinessType'] ==
-                                                            'NB'), 'Gross_BE']
-                                             ) + iferror(self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP008') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) & (self.Assumptions[
-                                                      'BusinessType'] == 'NB'),
-                                                 'Gross_RA']) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP008') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_CSM'])
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for remaining coverage - Only Loss Component"
-                    ), "Other contracts"] = iferror(self.Assumptions.loc[
-                        (self.Assumptions['Key'] == 'MAP001') &
-                        (self.Assumptions['Cohort'] == i) &
-                        (self.Assumptions['BusinessType'] == 'NB'),
-                        'Gross_LossC_BE']) + iferror(self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP001') &
-                            (self.Assumptions['Cohort'] == i) &
-                            (self.Assumptions['BusinessType'] == 'NB'),
-                            'Gross_LossC_RA']) + iferror(
-                                self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP005') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'NB'),
-                                    'Gross_LossC_BE']
-                            ) + iferror(self.Assumptions.loc[
-                                (self.Assumptions['Key'] == 'MAP005') &
-                                (self.Assumptions['Cohort'] == i) &
-                                (self.Assumptions['BusinessType'] == 'NB'),
-                                'Gross_LossC_RA']) + iferror(
-                                    self.Assumptions.loc[
-                                        (self.Assumptions['Key'] == 'MAP006') &
-                                        (self.Assumptions['Cohort'] == i) &
-                                        (self.Assumptions['BusinessType'] ==
-                                         'NB'), 'Gross_LossC_BE']
-                                ) + iferror(self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP006') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'NB'),
-                                    'Gross_LossC_RA']) + iferror(
-                                        self.Assumptions.loc[
-                                            (self.Assumptions['Key'] ==
-                                             'MAP008') &
-                                            (self.Assumptions['Cohort'] == i) &
-                                            (self.Assumptions['BusinessType']
-                                             == 'NB'), 'Gross_LossC_BE']
-                                    ) + iferror(
-                                        self.Assumptions.loc[
-                                            (self.Assumptions['Key'] ==
-                                             'MAP008') &
-                                            (self.Assumptions['Cohort'] == i) &
-                                            (self.Assumptions['BusinessType']
-                                             == 'NB'), 'Gross_LossC_RA']
-                                    ) + iferror(self.Assumptions.loc[
-                                        (self.Assumptions['Key'] == 'MAP009') &
-                                        (self.Assumptions['Cohort'] == i) &
-                                        (self.Assumptions['BusinessType'] ==
-                                         'NB'), 'Gross_LossC_BE']) + iferror(
-                                             self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP009') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) &
-                                                 (self.
-                                                  Assumptions['BusinessType']
-                                                  == 'NB'), 'Gross_LossC_RA']
-                                         ) + iferror(self.Assumptions.loc[
-                                             (self.Assumptions['Key'] ==
-                                              'MAP011') &
-                                             (self.Assumptions['Cohort'] == i)
-                                             &
-                                             (self.Assumptions['BusinessType']
-                                              == 'NB'),
-                                             'Gross_LossC_BE']) + iferror(
-                                                 self.Assumptions.loc[
-                                                     (self.Assumptions['Key']
-                                                      == 'MAP011') &
-                                                     (self.
-                                                      Assumptions['Cohort'] ==
-                                                      i) &
-                                                     (self.Assumptions[
-                                                         'BusinessType'] ==
-                                                      'NB'), 'Gross_LossC_RA']
-                                             ) + iferror(self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP014') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) & (self.Assumptions[
-                                                      'BusinessType'] == 'NB'),
-                                                 'Gross_LossC_BE']) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'),
-                                                         'Gross_LossC_RA'])
-                    self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
-                        (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for incurred claims"),
-                        "Other contracts"] = iferror(self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP001') &
-                            (self.Assumptions['Cohort'] == i) &
-                            (self.Assumptions['BusinessType'] == 'IF'),
-                            'Gross_BE']) + iferror(
-                                self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP001') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'IF'),
-                                    'Gross_RA']
-                            ) - iferror(self.Assumptions.loc[
-                                (self.Assumptions['Key'] == 'MAP001') &
-                                (self.Assumptions['Cohort'] == i) &
-                                (self.Assumptions['BusinessType'] == 'IF'),
-                                'Gross_CSM']) + iferror(self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP005') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'IF'),
-                                    'Gross_BE']) + iferror(
-                                        self.Assumptions.loc[
-                                            (self.Assumptions['Key'] ==
-                                             'MAP005') &
-                                            (self.Assumptions['Cohort'] == i) &
-                                            (self.Assumptions['BusinessType']
-                                             == 'IF'), 'Gross_RA']
-                                    ) - iferror(self.Assumptions.loc[
-                                        (self.Assumptions['Key'] == 'MAP005') &
-                                        (self.Assumptions['Cohort'] == i) &
-                                        (self.Assumptions['BusinessType'] ==
-                                         'IF'), 'Gross_CSM']) + iferror(
-                                             self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP006') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) &
-                                                 (self.
-                                                  Assumptions['BusinessType']
-                                                  == 'IF'), 'Gross_BE']
-                                         ) + iferror(
-                                             self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP006') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) & (self.Assumptions[
-                                                      'BusinessType'] ==
-                                                        'IF'), 'Gross_RA']
-                                         ) - iferror(self.Assumptions.loc[
-                                             (self.Assumptions['Key'] ==
-                                              'MAP006'
-                                              ) &
-                                             (self.Assumptions['Cohort'] == i)
-                                             &
-                                             (self.Assumptions['BusinessType']
-                                              == 'IF'),
-                                             'Gross_CSM']) + iferror(
-                                                 self.Assumptions.loc[
-                                                     (self.Assumptions['Key']
-                                                      == 'MAP008') &
-                                                     (self.Assumptions[
-                                                         'Cohort'] == i) & (
-                                                             self.Assumptions[
-                                                                 'BusinessType']
-                                                             ==
-                                                             'IF'), 'Gross_BE']
-                                             ) + iferror(self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP008')
-                                                 &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) & (self.Assumptions[
-                                                      'BusinessType'] == 'IF'),
-                                                 'Gross_RA']) - iferror(
-                                                     self.Assumptions.
-                                                     loc[(self.Assumptions[
-                                                         'Key'] == 'MAP008') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP001') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP001') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP005') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP005') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP006') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP006') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP008') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP008') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA'])
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Total"
-                    ), "Other contracts"] = self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for remaining coverage - Excluding loss component"
-                    ), "Other contracts"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i)
-                        &
-                        (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Only loss component"
-                         ),
-                        "Other contracts"] + self.Analysis_by_remaining_coverage.loc[
-                            (self.Analysis_by_remaining_coverage['Period'] == i
-                             ) &
-                            (self.Analysis_by_remaining_coverage['Measure'] ==
-                             "Liabilities for incurred claims"),
-                            "Other contracts"]
-
-                elif self.Parameters.loc[6,
-                                         'Selection'] == "Fair Value Approach":
-
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for remaining coverage - Excluding loss component"
-                    ), "Contracts under the fair value transition approach"] = self.Liability_on_Initial_Recognition.loc[
-                        i, "CSM at Initial Recognition"]
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for remaining coverage - Only Loss Component"
-                    ), "Contracts under the fair value transition approach"] = self.Liability_on_Initial_Recognition.loc[
-                        i,
-                        "LIABILITY ON INITIAL RECOGNITION-BE"] + self.Liability_on_Initial_Recognition.loc[
-                            i, "LIABILITY ON INITIAL RECOGNITION-RA"]
-                    self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
-                        (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for incurred claims"),
-                        "Contracts under the fair value transition approach"] = 0
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Total"
-                    ), "Contracts under the fair value transition approach"] = self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
-                        (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Excluding loss component"
-                         ),
-                        "Contracts under the fair value transition approach"] + self.Analysis_by_remaining_coverage.loc[
-                            (self.Analysis_by_remaining_coverage['Period'] == i
-                             ) &
-                            (self.Analysis_by_remaining_coverage['Measure'] ==
-                             "Liabilities for remaining coverage - Only loss component"
-                             ),
-                            "Contracts under the fair value transition approach"] + self.Analysis_by_remaining_coverage.loc[
-                                (self.
-                                 Analysis_by_remaining_coverage['Period'] == i)
-                                &
-                                (self.Analysis_by_remaining_coverage['Measure']
-                                 == "Liabilities for incurred claims"),
-                                "Contracts under the fair value transition approach"]
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for remaining coverage - Excluding loss component"
-                    ), "Other contracts"] = iferror(
-                        self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP001') &
-                            (self.Assumptions['Cohort'] == i) &
-                            (self.Assumptions['BusinessType'] == 'NB'),
-                            'Gross_BE']
-                    ) + iferror(self.Assumptions.loc[
-                        (self.Assumptions['Key'] == 'MAP001') &
-                        (self.Assumptions['Cohort'] == i) &
-                        (self.Assumptions['BusinessType'] == 'NB'),
-                        'Gross_RA']) - iferror(self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP001') &
-                            (self.Assumptions['Cohort'] == i) &
-                            (self.Assumptions['BusinessType'] == 'NB'),
-                            'Gross_CSM']) + iferror(self.Assumptions.loc[
-                                (self.Assumptions['Key'] == 'MAP005') &
-                                (self.Assumptions['Cohort'] == i) &
-                                (self.Assumptions['BusinessType'] == 'NB'),
-                                'Gross_BE']) + iferror(self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP005') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'NB'),
-                                    'Gross_RA']) - iferror(
-                                        self.Assumptions.loc[
-                                            (self.Assumptions['Key'] ==
-                                             'MAP005') &
-                                            (self.Assumptions['Cohort'] == i) &
-                                            (self.Assumptions['BusinessType']
-                                             == 'NB'), 'Gross_CSM']
-                                    ) + iferror(self.Assumptions.loc[
-                                        (self.Assumptions['Key'] == 'MAP006') &
-                                        (self.Assumptions['Cohort'] == i) &
-                                        (self.Assumptions['BusinessType'] ==
-                                         'NB'), 'Gross_BE']) + iferror(
-                                             self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP006') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) &
-                                                 (self.
-                                                  Assumptions['BusinessType']
-                                                  == 'NB'), 'Gross_RA']
-                                         ) - iferror(self.Assumptions.loc[
-                                             (self.Assumptions['Key'] ==
-                                              'MAP006') &
-                                             (self.Assumptions['Cohort'] == i)
-                                             &
-                                             (self.Assumptions['BusinessType']
-                                              == 'NB'),
-                                             'Gross_CSM']) + iferror(
-                                                 self.Assumptions.loc[
-                                                     (self.Assumptions['Key']
-                                                      == 'MAP008') &
-                                                     (self.
-                                                      Assumptions['Cohort'] ==
-                                                      i) & (self.Assumptions[
-                                                          'BusinessType'] ==
-                                                            'NB'), 'Gross_BE']
-                                             ) + iferror(self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP008') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) & (self.Assumptions[
-                                                      'BusinessType'] == 'NB'),
-                                                 'Gross_RA']) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP008') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'), 'Gross_CSM'])
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for remaining coverage - Only Loss Component"
-                    ), "Other contracts"] = iferror(self.Assumptions.loc[
-                        (self.Assumptions['Key'] == 'MAP001') &
-                        (self.Assumptions['Cohort'] == i) &
-                        (self.Assumptions['BusinessType'] == 'NB'),
-                        'Gross_LossC_BE']) + iferror(self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP001') &
-                            (self.Assumptions['Cohort'] == i) &
-                            (self.Assumptions['BusinessType'] == 'NB'),
-                            'Gross_LossC_RA']) + iferror(
-                                self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP005') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'NB'),
-                                    'Gross_LossC_BE']
-                            ) + iferror(self.Assumptions.loc[
-                                (self.Assumptions['Key'] == 'MAP005') &
-                                (self.Assumptions['Cohort'] == i) &
-                                (self.Assumptions['BusinessType'] == 'NB'),
-                                'Gross_LossC_RA']) + iferror(
-                                    self.Assumptions.loc[
-                                        (self.Assumptions['Key'] == 'MAP006') &
-                                        (self.Assumptions['Cohort'] == i) &
-                                        (self.Assumptions['BusinessType'] ==
-                                         'NB'), 'Gross_LossC_BE']
-                                ) + iferror(self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP006') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'NB'),
-                                    'Gross_LossC_RA']) + iferror(
-                                        self.Assumptions.loc[
-                                            (self.Assumptions['Key'] ==
-                                             'MAP008') &
-                                            (self.Assumptions['Cohort'] == i) &
-                                            (self.Assumptions['BusinessType']
-                                             == 'NB'), 'Gross_LossC_BE']
-                                    ) + iferror(
-                                        self.Assumptions.loc[
-                                            (self.Assumptions['Key'] ==
-                                             'MAP008') &
-                                            (self.Assumptions['Cohort'] == i) &
-                                            (self.Assumptions['BusinessType']
-                                             == 'NB'), 'Gross_LossC_RA']
-                                    ) + iferror(self.Assumptions.loc[
-                                        (self.Assumptions['Key'] == 'MAP009') &
-                                        (self.Assumptions['Cohort'] == i) &
-                                        (self.Assumptions['BusinessType'] ==
-                                         'NB'), 'Gross_LossC_BE']) + iferror(
-                                             self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP009') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) &
-                                                 (self.
-                                                  Assumptions['BusinessType']
-                                                  == 'NB'), 'Gross_LossC_RA']
-                                         ) + iferror(self.Assumptions.loc[
-                                             (self.Assumptions['Key'] ==
-                                              'MAP011') &
-                                             (self.Assumptions['Cohort'] == i)
-                                             &
-                                             (self.Assumptions['BusinessType']
-                                              == 'NB'),
-                                             'Gross_LossC_BE']) + iferror(
-                                                 self.Assumptions.loc[
-                                                     (self.Assumptions['Key']
-                                                      == 'MAP011') &
-                                                     (self.
-                                                      Assumptions['Cohort'] ==
-                                                      i) &
-                                                     (self.Assumptions[
-                                                         'BusinessType'] ==
-                                                      'NB'), 'Gross_LossC_RA']
-                                             ) + iferror(self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP014') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) & (self.Assumptions[
-                                                      'BusinessType'] == 'NB'),
-                                                 'Gross_LossC_BE']) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'NB'),
-                                                         'Gross_LossC_RA'])
-                    self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
-                        (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for incurred claims"),
-                        "Other contracts"] = iferror(self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP001') &
-                            (self.Assumptions['Cohort'] == i) &
-                            (self.Assumptions['BusinessType'] == 'IF'),
-                            'Gross_BE']) + iferror(
-                                self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP001') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'IF'),
-                                    'Gross_RA']
-                            ) - iferror(self.Assumptions.loc[
-                                (self.Assumptions['Key'] == 'MAP001') &
-                                (self.Assumptions['Cohort'] == i) &
-                                (self.Assumptions['BusinessType'] == 'IF'),
-                                'Gross_CSM']) + iferror(self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP005') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'IF'),
-                                    'Gross_BE']) + iferror(
-                                        self.Assumptions.loc[
-                                            (self.Assumptions['Key'] ==
-                                             'MAP005') &
-                                            (self.Assumptions['Cohort'] == i) &
-                                            (self.Assumptions['BusinessType']
-                                             == 'IF'), 'Gross_RA']
-                                    ) - iferror(self.Assumptions.loc[
-                                        (self.Assumptions['Key'] == 'MAP005') &
-                                        (self.Assumptions['Cohort'] == i) &
-                                        (self.Assumptions['BusinessType'] ==
-                                         'IF'), 'Gross_CSM']) + iferror(
-                                             self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP006') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) &
-                                                 (self.
-                                                  Assumptions['BusinessType']
-                                                  == 'IF'), 'Gross_BE']
-                                         ) + iferror(
-                                             self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP006') &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) & (self.Assumptions[
-                                                      'BusinessType'] ==
-                                                        'IF'), 'Gross_RA']
-                                         ) - iferror(self.Assumptions.loc[
-                                             (self.Assumptions['Key'] ==
-                                              'MAP006'
-                                              ) &
-                                             (self.Assumptions['Cohort'] == i)
-                                             &
-                                             (self.Assumptions['BusinessType']
-                                              == 'IF'),
-                                             'Gross_CSM']) + iferror(
-                                                 self.Assumptions.loc[
-                                                     (self.Assumptions['Key']
-                                                      == 'MAP008') &
-                                                     (self.Assumptions[
-                                                         'Cohort'] == i) & (
-                                                             self.Assumptions[
-                                                                 'BusinessType']
-                                                             ==
-                                                             'IF'), 'Gross_BE']
-                                             ) + iferror(self.Assumptions.loc[
-                                                 (self.Assumptions['Key'] ==
-                                                  'MAP008')
-                                                 &
-                                                 (self.Assumptions['Cohort'] ==
-                                                  i) & (self.Assumptions[
-                                                      'BusinessType'] == 'IF'),
-                                                 'Gross_RA']) - iferror(
-                                                     self.Assumptions.
-                                                     loc[(self.Assumptions[
-                                                         'Key'] == 'MAP008') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_RA']
-                                                 ) - iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'), 'Gross_CSM']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP001') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP001') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP005') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP005') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP006') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP006') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP008') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP008') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP009') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP011') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_BE']
-                                                 ) + iferror(
-                                                     self.Assumptions.loc[
-                                                         (self.
-                                                          Assumptions['Key'] ==
-                                                          'MAP014') &
-                                                         (self.Assumptions[
-                                                             'Cohort'] == i) &
-                                                         (self.Assumptions[
-                                                             'BusinessType'] ==
-                                                          'IF'),
-                                                         'Gross_LossC_RA'])
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Total"
-                    ), "Other contracts"] = self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for remaining coverage - Excluding loss component"
-                    ), "Other contracts"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i)
-                        &
-                        (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Only loss component"
-                         ),
-                        "Other contracts"] + self.Analysis_by_remaining_coverage.loc[
-                            (self.Analysis_by_remaining_coverage['Period'] == i
-                             ) &
-                            (self.Analysis_by_remaining_coverage['Measure'] ==
-                             "Liabilities for incurred claims"),
-                            "Other contracts"]
-
-                elif self.Parameters.loc[6, 'Selection'] == "Other":
-
-                    self.Analysis_by_remaining_coverage.loc[(
-                        self.Analysis_by_remaining_coverage['Period'] == i
-                    ) & (
-                        self.Analysis_by_remaining_coverage['Measure'] ==
-                        "Liabilities for remaining coverage - Excluding loss component"
-                    ), "Other contracts"] = self.Liability_on_Initial_Recognition.loc[
+                    ), "Other contracts recognised"] = -self.Liability_on_Initial_Recognition.loc[
                         i, "CSM at Initial Recognition"] + iferror(
+                            self.Assumptions.loc[
+                                (self.Assumptions['Key'] == 'MAP013') &
+                                (self.Assumptions['Cohort'] == i) &
+                                (self.Assumptions['BusinessType'] == 'NB'),
+                                'Gross_BECFPV']) + iferror(
+                            self.Assumptions.loc[
+                                (self.Assumptions['Key'] == 'MAP013') &
+                                (self.Assumptions['Cohort'] == i) &
+                                (self.Assumptions['BusinessType'] == 'NB'),
+                                'Gross_RACFPV']) + iferror(
                             self.Assumptions.loc[
                                 (self.Assumptions['Key'] == 'MAP001') &
                                 (self.Assumptions['Cohort'] == i) &
@@ -3483,12 +2153,13 @@ class GMM:
                                                          (self.Assumptions[
                                                              'BusinessType'] ==
                                                           'NB'), 'Gross_CSM'])
-                    self.Analysis_by_remaining_coverage.loc[(
+                    
+                self.Analysis_by_remaining_coverage.loc[(
                         self.Analysis_by_remaining_coverage['Period'] == i
                     ) & (
                         self.Analysis_by_remaining_coverage['Measure'] ==
                         "Liabilities for remaining coverage - Only Loss Component"
-                    ), "Other contracts"] = self.Liability_on_Initial_Recognition.loc[
+                    ), "Other contracts recognised"] = self.Liability_on_Initial_Recognition.loc[
                         i,
                         "LIABILITY ON INITIAL RECOGNITION-BE"] + self.Liability_on_Initial_Recognition.loc[
                             i,
@@ -3590,11 +2261,11 @@ class GMM:
                                                              'BusinessType'] ==
                                                           'NB'),
                                                          'Gross_LossC_RA'])
-                    self.Analysis_by_remaining_coverage.loc[
+                self.Analysis_by_remaining_coverage.loc[
                         (self.Analysis_by_remaining_coverage['Period'] == i) &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
                          "Liabilities for incurred claims"),
-                        "Other contracts"] = iferror(self.Assumptions.loc[
+                        "Other contracts recognised"] = iferror(self.Assumptions.loc[
                             (self.Assumptions['Key'] == 'MAP001') &
                             (self.Assumptions['Cohort'] == i) &
                             (self.Assumptions['BusinessType'] == 'IF'),
@@ -3917,151 +2588,110 @@ class GMM:
                                                          (self.Assumptions[
                                                              'BusinessType'] ==
                                                           'IF'),
-                                                         'Gross_LossC_RA'])
-                    self.Analysis_by_remaining_coverage.loc[(
+                                                         'Gross_LossC_RA'])    
+                self.Analysis_by_remaining_coverage.loc[(
                         self.Analysis_by_remaining_coverage['Period'] == i
                     ) & (
                         self.Analysis_by_remaining_coverage['Measure'] ==
                         "Total"
-                    ), "Other contracts"] = self.Analysis_by_remaining_coverage.loc[(
+                    ), "Other contracts recognised"] = self.Analysis_by_remaining_coverage.loc[(
                         self.Analysis_by_remaining_coverage['Period'] == i
                     ) & (
                         self.Analysis_by_remaining_coverage['Measure'] ==
                         "Liabilities for remaining coverage - Excluding loss component"
-                    ), "Other contracts"] + self.Analysis_by_remaining_coverage.loc[
+                    ), "Other contracts recognised"] + self.Analysis_by_remaining_coverage.loc[
                         (self.Analysis_by_remaining_coverage['Period'] == i)
                         &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
                          "Liabilities for remaining coverage - Only Loss Component"
                          ),
-                        "Other contracts"] + self.Analysis_by_remaining_coverage.loc[
+                        "Other contracts recognised"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
                              ) &
                             (self.Analysis_by_remaining_coverage['Measure'] ==
                              "Liabilities for incurred claims"),
-                            "Other contracts"]
-
+                            "Other contracts recognised"]
+    
                 self.Analysis_by_remaining_coverage.loc[(
                     self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for remaining coverage - Excluding loss component"
-                ), "Expected incurred claims and other insurance services expenses"] = iferror(
-                    self.Assumptions.loc[
-                        (self.Assumptions['Key'] == 'MAP013') &
-                        (self.Assumptions['Cohort'] == i) &
-                        (self.Assumptions['BusinessType'] == 'NB'), 'Gross_BE']
-                ) + iferror(self.Assumptions.loc[
-                    (self.Assumptions['Key'] == 'MAP013') &
-                    (self.Assumptions['Cohort'] == i) &
-                    (self.Assumptions['BusinessType'] == 'NB'),
-                    'Gross_RA']) - (iferror(self.Assumptions.loc[
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Expected incurred claims and other insurance services expenses"] = iferror(
+                        self.Assumptions.loc[
+                            (self.Assumptions['Key'] == 'MAP013') &
+                            (self.Assumptions['Cohort'] == i) &
+                            (self.Assumptions['BusinessType'] == 'NB'), 'Gross_BE']
+                    ) + iferror(self.Assumptions.loc[
                         (self.Assumptions['Key'] == 'MAP013') &
                         (self.Assumptions['Cohort'] == i) &
                         (self.Assumptions['BusinessType'] == 'NB'),
-                        'Gross_CSM'])) + iferror(self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP014') &
+                        'Gross_RA']) - (iferror(self.Assumptions.loc[
+                            (self.Assumptions['Key'] == 'MAP013') &
                             (self.Assumptions['Cohort'] == i) &
                             (self.Assumptions['BusinessType'] == 'NB'),
-                            'Gross_BE']) + iferror(self.Assumptions.loc[
-                                (self.Assumptions['Key'] == 'MAP014') &
-                                (self.Assumptions['Cohort'] == i) &
-                                (self.Assumptions['BusinessType'] == 'NB'),
-                                'Gross_RA']) - (iferror(self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP014') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'NB'),
-                                    'Gross_CSM']))
+                            'Gross_CSM'])) 
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for remaining coverage - Only Loss component"
-                ), "Expected incurred claims and other insurance services expenses"] = iferror(
-                    self.Assumptions.loc[
-                        (self.Assumptions['Key'] == 'MAP013') &
-                        (self.Assumptions['Cohort'] == i) &
-                        (self.Assumptions['BusinessType'] == 'NB'),
-                        'Gross_LossC_BE']
-                ) + iferror(self.Assumptions.loc[
-                    (self.Assumptions['Key'] == 'MAP013') &
-                    (self.Assumptions['Cohort'] == i) &
-                    (self.Assumptions['BusinessType'] == 'NB'),
-                    'Gross_LossC_RA']) + iferror(self.Assumptions.loc[
-                        (self.Assumptions['Key'] == 'MAP014') &
-                        (self.Assumptions['Cohort'] == i) &
-                        (self.Assumptions['BusinessType'] == 'NB'),
-                        'Gross_LossC_BE']) + iferror(self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP014') &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Only Loss component"
+                    ), "Expected incurred claims and other insurance services expenses"] = iferror(
+                        self.Assumptions.loc[
+                            (self.Assumptions['Key'] == 'MAP013') &
                             (self.Assumptions['Cohort'] == i) &
                             (self.Assumptions['BusinessType'] == 'NB'),
-                            'Gross_LossC_RA'])
+                            'Gross_LossC_BE']
+                    ) + iferror(self.Assumptions.loc[
+                        (self.Assumptions['Key'] == 'MAP013') &
+                        (self.Assumptions['Cohort'] == i) &
+                        (self.Assumptions['BusinessType'] == 'NB'),
+                        'Gross_LossC_RA']) 
                 self.Analysis_by_remaining_coverage.loc[(
                     self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for incurred claims"
-                ), "Expected incurred claims and other insurance services expenses"] = iferror(
-                    self.Assumptions.loc[
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for incurred claims"
+                    ), "Expected incurred claims and other insurance services expenses"] = iferror(
+                        self.Assumptions.loc[
+                            (self.Assumptions['Key'] == 'MAP013') &
+                            (self.Assumptions['Cohort'] == i) &
+                            (self.Assumptions['BusinessType'] == 'IF'), 'Gross_BE']
+                    ) + iferror(
+                        self.Assumptions.loc[
+                            (self.Assumptions['Key'] == 'MAP013') &
+                            (self.Assumptions['Cohort'] == i) &
+                            (self.Assumptions['BusinessType'] == 'IF'), 'Gross_RA']
+                    ) - iferror(self.Assumptions.loc[
                         (self.Assumptions['Key'] == 'MAP013') &
-                        (self.Assumptions['Cohort'] == i) &
-                        (self.Assumptions['BusinessType'] == 'IF'), 'Gross_BE']
-                ) + iferror(
-                    self.Assumptions.loc[
-                        (self.Assumptions['Key'] == 'MAP013') &
-                        (self.Assumptions['Cohort'] == i) &
-                        (self.Assumptions['BusinessType'] == 'IF'), 'Gross_RA']
-                ) - iferror(self.Assumptions.loc[
-                    (self.Assumptions['Key'] == 'MAP013') &
-                    (self.Assumptions['Cohort'] == i) &
-                    (self.Assumptions['BusinessType'] == 'IF'),
-                    'Gross_CSM']) + iferror(self.Assumptions.loc[
-                        (self.Assumptions['Key'] == 'MAP014') &
                         (self.Assumptions['Cohort'] == i) &
                         (self.Assumptions['BusinessType'] == 'IF'),
-                        'Gross_BE']) + iferror(self.Assumptions.loc[
-                            (self.Assumptions['Key'] == 'MAP014') &
-                            (self.Assumptions['Cohort'] == i) &
-                            (self.Assumptions['BusinessType'] == 'IF'),
-                            'Gross_RA']) - iferror(self.Assumptions.loc[
-                                (self.Assumptions['Key'] == 'MAP014') &
-                                (self.Assumptions['Cohort'] == i) &
-                                (self.Assumptions['BusinessType'] == 'IF'),
-                                'Gross_CSM']) + iferror(
-                                    self.Assumptions.loc[
+                        'Gross_CSM']) +  iferror(
+                                        self.Assumptions.loc[
+                                            (self.Assumptions['Key'] == 'MAP013') &
+                                            (self.Assumptions['Cohort'] == i) &
+                                            (self.Assumptions['BusinessType'] ==
+                                            'IF'), 'Gross_LossC_BE']
+                                    ) + iferror(self.Assumptions.loc[
                                         (self.Assumptions['Key'] == 'MAP013') &
                                         (self.Assumptions['Cohort'] == i) &
-                                        (self.Assumptions['BusinessType'] ==
-                                         'IF'), 'Gross_LossC_BE']
-                                ) + iferror(self.Assumptions.loc[
-                                    (self.Assumptions['Key'] == 'MAP013') &
-                                    (self.Assumptions['Cohort'] == i) &
-                                    (self.Assumptions['BusinessType'] == 'IF'),
-                                    'Gross_LossC_RA']) + iferror(
-                                        self.Assumptions.loc[
-                                            (self.Assumptions['Key'] ==
-                                             'MAP014') &
-                                            (self.Assumptions['Cohort'] == i) &
-                                            (self.Assumptions['BusinessType']
-                                             == 'IF'), 'Gross_LossC_BE']
-                                    ) + iferror(self.Assumptions.loc[
-                                        (self.Assumptions['Key'] == 'MAP014') &
-                                        (self.Assumptions['Cohort'] == i) &
-                                        (self.Assumptions['BusinessType'] ==
-                                         'IF'), 'Gross_LossC_RA'])
+                                        (self.Assumptions['BusinessType'] == 'IF'),
+                                        'Gross_LossC_RA']) 
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Expected incurred claims and other insurance services expenses"] = self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i) &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Excluding loss component"
-                     ),
-                    "Expected incurred claims and other insurance services expenses"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Expected incurred claims and other insurance services expenses"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Expected incurred claims and other insurance services expenses"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Only Loss component"
+                         "Liabilities for remaining coverage - Only Loss Component"
                          ),
                         "Expected incurred claims and other insurance services expenses"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
@@ -4132,18 +2762,20 @@ class GMM:
                                 (self.Assumptions['BusinessType'] == 'IF'),
                                 'Gross_LossC_RA'])
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Losses and reversals of losses on onerous contracts"] = self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i) &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Excluding loss component"
-                     ),
-                    "Losses and reversals of losses on onerous contracts"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Losses and reversals of losses on onerous contracts"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Losses and reversals of losses on onerous contracts"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Only Loss component"
+                         "Liabilities for remaining coverage - Only Loss Component"
                          ),
                         "Losses and reversals of losses on onerous contracts"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
@@ -4152,6 +2784,7 @@ class GMM:
                              "Liabilities for incurred claims"),
                             "Losses and reversals of losses on onerous contracts"]
 
+    
                 self.Analysis_by_remaining_coverage.loc[(
                     self.Analysis_by_remaining_coverage['Period'] == i
                 ) & (
@@ -4214,18 +2847,20 @@ class GMM:
                                 (self.Assumptions['BusinessType'] == 'IF'),
                                 'Gross_LossC_RA'])
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Adjustments to liabilities for incurred claims"] = self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i) &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Excluding loss component"
-                     ),
-                    "Adjustments to liabilities for incurred claims"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Adjustments to liabilities for incurred claims"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Adjustments to liabilities for incurred claims"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Only Loss component"
+                         "Liabilities for remaining coverage - Only Loss Component"
                          ),
                         "Adjustments to liabilities for incurred claims"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
@@ -4239,23 +2874,12 @@ class GMM:
                 ) & (
                     self.Analysis_by_remaining_coverage['Measure'] ==
                     "Liabilities for remaining coverage - Excluding loss component"
-                ), "Insurance service result"] = self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for remaining coverage - Excluding loss component"
-                ), "Contracts under the modified retrospective transition approach"] + self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i)
-                    &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Excluding loss component"
-                     ),
-                    "Contracts under the fair value transition approach"] + self.Analysis_by_remaining_coverage.loc[
+                ), "Insurance service result"] =  self.Analysis_by_remaining_coverage.loc[
                         (self.Analysis_by_remaining_coverage['Period'] == i) &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
                          "Liabilities for remaining coverage - Excluding loss component"
                          ),
-                        "Other contracts"] + self.Analysis_by_remaining_coverage.loc[
+                        "Other contracts recognised"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
                              ) &
                             (self.Analysis_by_remaining_coverage['Measure'] ==
@@ -4282,23 +2906,12 @@ class GMM:
                 ) & (
                     self.Analysis_by_remaining_coverage['Measure'] ==
                     "Liabilities for remaining coverage - Only Loss component"
-                ), "Insurance service result"] = self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for remaining coverage - Only Loss component"
-                ), "Contracts under the modified retrospective transition approach"] + self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i)
-                    &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Only Loss component"
-                     ),
-                    "Contracts under the fair value transition approach"] + self.Analysis_by_remaining_coverage.loc[
+                ), "Insurance service result"] = self.Analysis_by_remaining_coverage.loc[
                         (self.Analysis_by_remaining_coverage['Period'] == i) &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
                          "Liabilities for remaining coverage - Only Loss component"
                          ),
-                        "Other contracts"] + self.Analysis_by_remaining_coverage.loc[
+                        "Other contracts recognised"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
                              ) &
                             (self.Analysis_by_remaining_coverage['Measure'] ==
@@ -4325,20 +2938,11 @@ class GMM:
                 ) & (
                     self.Analysis_by_remaining_coverage['Measure'] ==
                     "Liabilities for incurred claims"
-                ), "Insurance service result"] = self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for incurred claims"
-                ), "Contracts under the modified retrospective transition approach"] + self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i)
-                    & (self.Analysis_by_remaining_coverage['Measure'] ==
-                       "Liabilities for incurred claims"),
-                    "Contracts under the fair value transition approach"] + self.Analysis_by_remaining_coverage.loc[
+                ), "Insurance service result"] = self.Analysis_by_remaining_coverage.loc[
                         (self.Analysis_by_remaining_coverage['Period'] == i) &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
                          "Liabilities for incurred claims"),
-                        "Other contracts"] + self.Analysis_by_remaining_coverage.loc[
+                        "Other contracts recognised"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
                              ) &
                             (self.Analysis_by_remaining_coverage['Measure'] ==
@@ -4357,25 +2961,27 @@ class GMM:
                                      == "Liabilities for incurred claims"),
                                     "Adjustments to liabilities for incurred claims"]
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Insurance service result"] = self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for remaining coverage - Excluding loss component"
-                ), "Insurance service result"] + self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i)
-                    &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Only Loss component"
-                     ),
-                    "Insurance service result"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Insurance service result"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Insurance service result"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for incurred claims"),
-                        "Insurance service result"]
+                         "Liabilities for remaining coverage - Only Loss Component"
+                         ),
+                        "Insurance service result"] + self.Analysis_by_remaining_coverage.loc[
+                            (self.Analysis_by_remaining_coverage['Period'] == i
+                             ) &
+                            (self.Analysis_by_remaining_coverage['Measure'] ==
+                             "Liabilities for incurred claims"),
+                            "Insurance service result"]
 
                 self.Analysis_by_remaining_coverage.loc[(
                     self.Analysis_by_remaining_coverage['Period'] == i
@@ -4491,18 +3097,20 @@ class GMM:
                                                   Assumptions['BusinessType']
                                                   == 'IF'), 'Gross_LossC_RA'])
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Net finance expenses from insurance contracts"] = self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i) &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Excluding loss component"
-                     ),
-                    "Net finance expenses from insurance contracts"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Net finance expenses from insurance contracts"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Net finance expenses from insurance contracts"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Only Loss component"
+                         "Liabilities for remaining coverage - Only Loss Component"
                          ),
                         "Net finance expenses from insurance contracts"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
@@ -4556,18 +3164,20 @@ class GMM:
                          "Liabilities for incurred claims"),
                         "Effect of movement in exchange rates"]
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Investment components and premium refunds"] = self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i) &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Excluding loss component"
-                     ),
-                    "Investment components and premium refunds"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Investment components and premium refunds"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Investment components and premium refunds"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Only Loss component"
+                         "Liabilities for remaining coverage - Only Loss Component"
                          ),
                         "Investment components and premium refunds"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
@@ -4621,18 +3231,20 @@ class GMM:
                          "Liabilities for incurred claims"),
                         "Investment components and premium refunds"]
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Total changes in the statement of profit and loss and OCI"] = self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i) &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Excluding loss component"
-                     ),
-                    "Total changes in the statement of profit and loss and OCI"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Total changes in the statement of profit and loss and OCI"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Total changes in the statement of profit and loss and OCI"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Only Loss component"
+                         "Liabilities for remaining coverage - Only Loss Component"
                          ),
                         "Total changes in the statement of profit and loss and OCI"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
@@ -4652,31 +3264,34 @@ class GMM:
                     (self.Assumptions['BusinessType'] == 'NB'),
                     'Gross_Actual'])
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Premiums received"] = self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for remaining coverage - Excluding loss component"
-                ), "Premiums received"] + self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i) &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Only Loss component"
-                     ),
-                    "Premiums received"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Premiums received"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Premiums received"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for incurred claims"),
-                        "Premiums received"]
+                         "Liabilities for remaining coverage - Only Loss Component"
+                         ),
+                        "Premiums received"] + self.Analysis_by_remaining_coverage.loc[
+                            (self.Analysis_by_remaining_coverage['Period'] == i
+                             ) &
+                            (self.Analysis_by_remaining_coverage['Measure'] ==
+                             "Liabilities for incurred claims"),
+                            "Premiums received"]
 
                 self.Analysis_by_remaining_coverage.loc[(
                     self.Analysis_by_remaining_coverage['Period'] == i
                 ) & (
                     self.Analysis_by_remaining_coverage['Measure'] ==
                     "Liabilities for remaining coverage - Excluding loss component"
-                ), "Claims and other insurance services expenses paid, including investment components"] = iferror(
+                ), "Actual claims and other expenses paid"] = iferror(
                     self.Assumptions.loc[
                         (self.Assumptions['Key'] == 'MAP012') &
                         (self.Assumptions['Cohort'] == i) &
@@ -4687,32 +3302,34 @@ class GMM:
                 ) & (
                     self.Analysis_by_remaining_coverage['Measure'] ==
                     "Liabilities for incurred claims"
-                ), "Claims and other insurance services expenses paid, including investment components"] = iferror(
+                ), "Actual claims and other expenses paid"] = iferror(
                     self.Assumptions.loc[
                         (self.Assumptions['Key'] == 'MAP012') &
                         (self.Assumptions['Cohort'] == i) &
                         (self.Assumptions['BusinessType'] == 'IF'),
                         'Gross_Actual'])
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Claims and other insurance services expenses paid, including investment components"] = self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i) &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Excluding loss component"
-                     ),
-                    "Claims and other insurance services expenses paid, including investment components"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Actual claims and other expenses paid"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Actual claims and other expenses paid"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for remaining coverage - Only Loss component"
+                         "Liabilities for remaining coverage - Only Loss Component"
                          ),
-                        "Claims and other insurance services expenses paid, including investment components"] + self.Analysis_by_remaining_coverage.loc[
+                        "Actual claims and other expenses paid"] + self.Analysis_by_remaining_coverage.loc[
                             (self.Analysis_by_remaining_coverage['Period'] == i
                              ) &
                             (self.Analysis_by_remaining_coverage['Measure'] ==
                              "Liabilities for incurred claims"),
-                            "Claims and other insurance services expenses paid, including investment components"]
+                            "Actual claims and other expenses paid"]
 
                 self.Analysis_by_remaining_coverage.loc[(
                     self.Analysis_by_remaining_coverage['Period'] == i
@@ -4736,25 +3353,27 @@ class GMM:
                             (self.Assumptions['BusinessType'] == 'IF'),
                             'Gross_Actual'])
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Insurance acquisition cash flows"] = self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for remaining coverage - Excluding loss component"
-                ), "Insurance acquisition cash flows"] + self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i)
-                    &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Only Loss component"
-                     ),
-                    "Insurance acquisition cash flows"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Insurance acquisition cash flows"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Insurance acquisition cash flows"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for incurred claims"),
-                        "Insurance acquisition cash flows"]
+                         "Liabilities for remaining coverage - Only Loss Component"
+                         ),
+                        "Insurance acquisition cash flows"] + self.Analysis_by_remaining_coverage.loc[
+                            (self.Analysis_by_remaining_coverage['Period'] == i
+                             ) &
+                            (self.Analysis_by_remaining_coverage['Measure'] ==
+                             "Liabilities for incurred claims"),
+                            "Insurance acquisition cash flows"]
 
                 self.Analysis_by_remaining_coverage.loc[(
                     self.Analysis_by_remaining_coverage['Period'] == i
@@ -4771,7 +3390,7 @@ class GMM:
                     (self.Analysis_by_remaining_coverage['Measure'] ==
                      "Liabilities for remaining coverage - Excluding loss component"
                      ),
-                    "Claims and other insurance services expenses paid, including investment components"] + self.Analysis_by_remaining_coverage.loc[
+                    "Actual claims and other expenses paid"] + self.Analysis_by_remaining_coverage.loc[
                         (self.Analysis_by_remaining_coverage['Period'] == i) &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
                          "Liabilities for remaining coverage - Excluding loss component"
@@ -4791,7 +3410,7 @@ class GMM:
                     (self.Analysis_by_remaining_coverage['Measure'] ==
                      "Liabilities for remaining coverage - Only Loss component"
                      ),
-                    "Claims and other insurance services expenses paid, including investment components"] + self.Analysis_by_remaining_coverage.loc[
+                    "Actual claims and other expenses paid"] + self.Analysis_by_remaining_coverage.loc[
                         (self.Analysis_by_remaining_coverage['Period'] == i) &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
                          "Liabilities for remaining coverage - Only Loss component"
@@ -4810,30 +3429,33 @@ class GMM:
                     (self.Analysis_by_remaining_coverage['Period'] == i) &
                     (self.Analysis_by_remaining_coverage['Measure'] ==
                      "Liabilities for incurred claims"),
-                    "Claims and other insurance services expenses paid, including investment components"] + self.Analysis_by_remaining_coverage.loc[
+                    "Actual claims and other expenses paid"] + self.Analysis_by_remaining_coverage.loc[
                         (self.Analysis_by_remaining_coverage['Period'] == i) &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
                          "Liabilities for incurred claims"),
                         "Insurance acquisition cash flows"]
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Total cash flows"] = self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for remaining coverage - Excluding loss component"
-                ), "Total cash flows"] + self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i) &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Only Loss component"
-                     ),
-                    "Total cash flows"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Total cash flows"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Total cash flows"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for incurred claims"),
-                        "Total cash flows"]
+                         "Liabilities for remaining coverage - Only Loss Component"
+                         ),
+                        "Total cash flows"] + self.Analysis_by_remaining_coverage.loc[
+                            (self.Analysis_by_remaining_coverage['Period'] == i
+                             ) &
+                            (self.Analysis_by_remaining_coverage['Measure'] ==
+                             "Liabilities for incurred claims"),
+                            "Total cash flows"]
 
                 self.Analysis_by_remaining_coverage.loc[(
                     self.Analysis_by_remaining_coverage['Period'] == i
@@ -4862,7 +3484,7 @@ class GMM:
                             (self.Analysis_by_remaining_coverage['Measure'] ==
                              "Liabilities for remaining coverage - Excluding loss component"
                              ),
-                            "Transfer to other items in the statement of financial position"]
+                            "Other items transfer in the statement of financial position"]
                 self.Analysis_by_remaining_coverage.loc[(
                     self.Analysis_by_remaining_coverage['Period'] == i
                 ) & (
@@ -4890,7 +3512,7 @@ class GMM:
                             (self.Analysis_by_remaining_coverage['Measure'] ==
                              "Liabilities for remaining coverage - Only Loss component"
                              ),
-                            "Transfer to other items in the statement of financial position"]
+                            "Other items transfer in the statement of financial position"]
                 self.Analysis_by_remaining_coverage.loc[(
                     self.Analysis_by_remaining_coverage['Period'] == i
                 ) & (
@@ -4914,29 +3536,33 @@ class GMM:
                              ) &
                             (self.Analysis_by_remaining_coverage['Measure'] ==
                              "Liabilities for incurred claims"),
-                            "Transfer to other items in the statement of financial position"]
+                            "Other items transfer in the statement of financial position"]
                 self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] == "Total"
-                ), "Net balance at 31 December"] = self.Analysis_by_remaining_coverage.loc[(
-                    self.Analysis_by_remaining_coverage['Period'] == i
-                ) & (
-                    self.Analysis_by_remaining_coverage['Measure'] ==
-                    "Liabilities for remaining coverage - Excluding loss component"
-                ), "Net balance at 31 December"] + self.Analysis_by_remaining_coverage.loc[
-                    (self.Analysis_by_remaining_coverage['Period'] == i)
-                    &
-                    (self.Analysis_by_remaining_coverage['Measure'] ==
-                     "Liabilities for remaining coverage - Only Loss component"
-                     ),
-                    "Net balance at 31 December"] + self.Analysis_by_remaining_coverage.loc[
-                        (self.Analysis_by_remaining_coverage['Period'] == i) &
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Total"
+                    ), "Net balance at 31 December"] = self.Analysis_by_remaining_coverage.loc[(
+                        self.Analysis_by_remaining_coverage['Period'] == i
+                    ) & (
+                        self.Analysis_by_remaining_coverage['Measure'] ==
+                        "Liabilities for remaining coverage - Excluding loss component"
+                    ), "Net balance at 31 December"] + self.Analysis_by_remaining_coverage.loc[
+                        (self.Analysis_by_remaining_coverage['Period'] == i)
+                        &
                         (self.Analysis_by_remaining_coverage['Measure'] ==
-                         "Liabilities for incurred claims"),
-                        "Net balance at 31 December"]
+                         "Liabilities for remaining coverage - Only Loss Component"
+                         ),
+                        "Net balance at 31 December"] + self.Analysis_by_remaining_coverage.loc[
+                            (self.Analysis_by_remaining_coverage['Period'] == i
+                             ) &
+                            (self.Analysis_by_remaining_coverage['Measure'] ==
+                             "Liabilities for incurred claims"),
+                            "Net balance at 31 December"]
+
 
             self.ARC.append(self.Analysis_by_remaining_coverage)
 
         self.ARC = pd.concat(self.ARC)
         self.ARC = self.ARC.to_csv('Analysis_by_remaining_coverage.csv')
+        df_ARC = pd.DataFrame(self.ARC)
