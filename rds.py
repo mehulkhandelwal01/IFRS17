@@ -20,7 +20,8 @@ def run_query(query):
         return cur.fetchall()
 
 rows = run_query("SELECT * from BEL;")
+st.write(type(rows))
 
 # Print results.
 # Print results.
-st.write(rows)
+#st.write(rows)
