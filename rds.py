@@ -20,9 +20,7 @@ def run_query(query):
         return cur.fetchall()
 
 rows = run_query("SELECT * from BEL;")
-headers = run_query("SELECT COLUMN_NAME
-                    FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME = N'BEL';")
+headers = run_query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'BEL';")
 
 st.write(pd.DataFrame(rows,columns=[headers]))
 
