@@ -22,4 +22,5 @@ def run_query(query):
 rows = run_query("SELECT * from BEL;")
 
 # Print results.
-print(rows)
+# Print results.
+st.write(f"{row}:")
