@@ -1,5 +1,5 @@
 # streamlit_app.py
-
+import pandas as pd
 import streamlit as st
 import mysql.connector
 
