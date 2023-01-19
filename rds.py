@@ -23,4 +23,4 @@ rows = run_query("SELECT * from BEL;")
 
 # Print results.
 # Print results.
-st.write(f"{row}:")
+st.write(rows)
