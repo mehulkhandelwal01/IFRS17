@@ -20,7 +20,7 @@ def run_query(query):
         return cur.fetchall()
 
 rows = run_query("SELECT * from BEL;")
-st.write(type(rows))
+st.write(pd.DataFrame(rows))
 
 # Print results.
 # Print results.
